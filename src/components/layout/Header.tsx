@@ -10,7 +10,7 @@ export function Header() {
   const logoUrl = useSiteConfigStore((s) => s.logoUrl);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-border bg-bg/90 px-4 py-3 backdrop-blur-md">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-border bg-bg/90 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-md">
       <div className="flex min-w-0 items-center gap-2.5">
         {logoUrl ? (
           <img src={logoUrl} alt="" className="glow-accent h-9 w-9 shrink-0 rounded-xl object-cover" />

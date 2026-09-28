@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Capacitor } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
 import { Header } from "./components/layout/Header";
 import { BottomNav, type Tab } from "./components/layout/BottomNav";
 import { StickyQueueButton } from "./components/mods/StickyQueueButton";
@@ -19,6 +21,12 @@ function App() {
     initRole();
     loadLogo();
   }, [initRole, loadLogo]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    StatusBar.setOverlaysWebView({ overlay: true });
+    StatusBar.setStyle({ style: Style.Light });
+  }, []);
 
   return (
     <div className="bg-app-glow flex h-dvh flex-col">

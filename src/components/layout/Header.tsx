@@ -10,13 +10,13 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-border bg-bg/90 px-4 py-3 backdrop-blur-md">
       <div className="flex min-w-0 items-center gap-2.5">
-        <div className="gradient-brand glow-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white">
+        <div className="gradient-brand glow-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-black">
           <Box size={19} strokeWidth={2.5} />
         </div>
         <div className="min-w-0 leading-tight">
           <div className="font-display truncate text-[16px] font-bold text-gradient-brand">OptiVault</div>
           <div className="truncate text-[11px] text-text-faint">
-            by <span className="font-semibold text-cyan">bishing</span>
+            by <span className="font-semibold text-accent-light">bishing</span>
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@ export function Header() {
         <select
           value={loader}
           onChange={(e) => setLoader(e.target.value as any)}
-          className="rounded-lg border border-border bg-surface px-2 py-1.5 text-xs font-semibold text-cyan outline-none"
+          className="rounded-lg border border-border bg-surface px-2 py-1.5 text-xs font-semibold text-text outline-none"
         >
           {LOADERS.map((l) => (
             <option key={l.id} value={l.id}>

@@ -49,7 +49,7 @@ export function ModCard({
         <button
           onClick={onToggle}
           className={`flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
-            added ? "gradient-brand text-white" : "bg-surface-2 text-text-muted hover:text-text"
+            added ? "gradient-brand text-black" : "bg-surface-2 text-text-muted hover:text-text"
           }`}
         >
           {added ? <Check size={13} /> : <Plus size={13} />}
@@ -60,7 +60,7 @@ export function ModCard({
       <p className="mb-2 text-[12px] leading-snug text-text-muted">{description}</p>
 
       {tip && (
-        <div className="mb-2 flex items-start gap-1.5 rounded-lg border border-cyan/20 bg-cyan-soft px-2.5 py-2 text-[11px] leading-snug text-cyan">
+        <div className="mb-2 flex items-start gap-1.5 rounded-lg border border-border bg-surface-2 px-2.5 py-2 text-[11px] leading-snug text-text-muted">
           <Lightbulb size={13} className="mt-0.5 shrink-0 text-warn" />
           <span>{tip}</span>
         </div>

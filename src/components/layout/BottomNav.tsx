@@ -33,7 +33,7 @@ export function BottomNav({ active, onChange }: Props) {
             <span className="relative">
               <Icon size={20} strokeWidth={isActive ? 2.4 : 2} />
               {!!item.badge && (
-                <span className="gradient-brand glow-accent absolute -right-2 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-white">
+                <span className="gradient-brand glow-accent absolute -right-2 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-black">
                   {item.badge}
                 </span>
               )}

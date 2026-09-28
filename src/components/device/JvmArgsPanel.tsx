@@ -25,14 +25,14 @@ export function JvmArgsPanel() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative overflow-hidden rounded-2xl border border-accent/30 bg-surface p-4">
-        <div className="gradient-brand pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-20 blur-2xl" />
+    <div className="flex flex-col gap-3.5">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-4">
+        <div className="bg-accent pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-[0.08] blur-2xl" />
         <div className="relative mb-3 flex flex-wrap items-center gap-2">
-          <span className="gradient-brand flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold text-white">
+          <span className="gradient-brand flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold text-black">
             <Zap size={12} /> Device Presets & JVM Tuning
           </span>
-          <span className="rounded-full bg-good-soft px-2.5 py-1 text-[11px] font-bold text-good">
+          <span className="rounded-full border border-border bg-surface-2 px-2.5 py-1 text-[11px] font-bold text-text-muted">
             Selected: {device.name.split(" / ")[0]}
           </span>
         </div>
@@ -44,7 +44,7 @@ export function JvmArgsPanel() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-border border-l-4 border-l-cyan bg-surface p-4">
+      <div className="rounded-2xl border border-border bg-surface p-4">
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
             <div className="font-display text-[15px] font-bold text-text">{device.name}</div>
@@ -58,16 +58,16 @@ export function JvmArgsPanel() {
             Tier: {device.tier}
           </span>
         </div>
-        <div className="flex items-center justify-between rounded-lg border border-cyan/30 bg-cyan-soft px-3 py-2 text-[11px] font-semibold text-cyan">
+        <div className="flex items-center justify-between rounded-lg border border-accent/25 bg-accent-soft px-3 py-2 text-[11px] font-semibold text-accent-light">
           <span>Recommended Renderer</span>
           <span>{RENDERER_LABEL[device.renderer]}</span>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border border-l-4 border-l-good bg-surface p-4">
+      <div className="rounded-2xl border border-border bg-surface p-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-sm font-bold text-text">
-            <Sliders size={15} className="text-good" /> Pojav Allocated RAM
+            <Sliders size={15} className="text-accent-light" /> Pojav Allocated RAM
           </span>
           <span className="rounded-md border border-border-light bg-surface-2 px-2 py-1 text-xs font-bold text-text">
             {ramLabel(ramMB)}
@@ -80,48 +80,48 @@ export function JvmArgsPanel() {
           step={100}
           value={ramMB}
           onChange={(e) => setRamMB(Number(e.target.value))}
-          className="w-full accent-good"
+          className="w-full accent-accent"
         />
         <div className="mt-1 flex justify-between text-[10px] text-text-faint">
           <span>{ramLabel(device.minRamMB)} Min</span>
-          <span className="font-semibold text-good">Rec: {device.recommendedRamMB} MB</span>
+          <span className="font-semibold text-accent-light">Rec: {device.recommendedRamMB} MB</span>
           <span>{ramLabel(device.maxRamMB)} Max</span>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border border-l-4 border-l-accent bg-surface p-4">
+      <div className="rounded-2xl border border-border bg-surface p-4">
         <div className="mb-2 flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-[12px] font-bold text-text">
             <Terminal size={14} className="text-accent-light" /> JVM Arguments
           </span>
           <button
             onClick={copy}
-            className="gradient-brand glow-accent flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white active:opacity-80"
+            className="gradient-brand glow-accent flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-black active:opacity-80"
           >
             {copied ? <Check size={13} /> : <Copy size={13} />}
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
         <div className="mb-2 text-[10px] text-text-faint">{tierLabel(device)}</div>
-        <pre className="no-scrollbar overflow-x-auto rounded-lg border border-border bg-surface-2 p-3 font-mono text-[11px] leading-relaxed text-good">
+        <pre className="no-scrollbar overflow-x-auto rounded-lg border border-border bg-surface-2 p-3 font-mono text-[11px] leading-relaxed text-accent-light">
           {args}
         </pre>
       </div>
 
-      <div className="rounded-2xl border border-border border-l-4 border-l-warn bg-surface p-4">
+      <div className="rounded-2xl border border-border bg-surface p-4">
         <div className="mb-2 flex items-center gap-1.5 text-[12px] font-bold text-text">
           <Lightbulb size={14} className="text-warn" /> PojavLauncher Calibration Settings
         </div>
         <ul className="flex flex-col gap-1.5 text-[12px] text-text-muted">
           <li>
             <span className="font-semibold text-text">Renderer:</span> Set to{" "}
-            <code className="rounded bg-surface-2 px-1 py-0.5 text-cyan">{RENDERER_LABEL[device.renderer]}</code>{" "}
+            <code className="rounded bg-surface-2 px-1 py-0.5 text-accent-light">{RENDERER_LABEL[device.renderer]}</code>{" "}
             in Video &amp; Render settings.
           </li>
           <li>
             <span className="font-semibold text-text">Resolution Scaler:</span> Set to{" "}
-            <code className="rounded bg-surface-2 px-1 py-0.5 text-cyan">{device.resolutionScaler}%</code> to balance
-            sharpness against thermals.
+            <code className="rounded bg-surface-2 px-1 py-0.5 text-accent-light">{device.resolutionScaler}%</code> to
+            balance sharpness against thermals.
           </li>
           <li>
             <span className="font-semibold text-text">Sustained Performance:</span> Turn{" "}

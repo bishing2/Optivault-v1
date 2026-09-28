@@ -71,7 +71,7 @@ export function QueueSheet({ onClose }: Props) {
             <div>
               <div className="font-display flex items-center gap-1.5 text-[15px] font-bold text-text">
                 Active Modpack
-                <span className="gradient-brand rounded-full px-2 py-0.5 text-[10px] font-bold text-white">
+                <span className="gradient-brand rounded-full px-2 py-0.5 text-[10px] font-bold text-black">
                   {modQueue.length} Mods
                 </span>
               </div>

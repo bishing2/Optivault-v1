@@ -23,7 +23,7 @@ export function DevicePresetPicker() {
   return (
     <div className="rounded-2xl border border-border bg-surface p-4">
       <div className="mb-3 flex items-center gap-2">
-        <div className="gradient-brand flex h-9 w-9 items-center justify-center rounded-xl text-white">
+        <div className="gradient-brand flex h-9 w-9 items-center justify-center rounded-xl text-black">
           <Cpu size={17} />
         </div>
         <div>
@@ -49,7 +49,7 @@ export function DevicePresetPicker() {
             onClick={() => setBrand(b)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
               brand === b
-                ? "gradient-brand glow-accent text-white"
+                ? "gradient-brand glow-accent text-black"
                 : "bg-surface-2 text-text-muted hover:text-text"
             }`}
           >
@@ -90,7 +90,7 @@ export function DevicePresetPicker() {
                   className={`rounded px-1.5 py-0.5 font-semibold ${
                     dv.renderer === "zink-turnip"
                       ? "bg-good-soft text-good"
-                      : "bg-cyan-soft text-cyan"
+                      : "bg-surface text-text-muted"
                   }`}
                 >
                   {RENDERER_LABEL[dv.renderer]}

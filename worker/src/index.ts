@@ -87,8 +87,9 @@ export default {
         if (!code) return err(400, "Code is required.");
 
         if (code === env.OWNER_SETUP_CODE) {
-          const existingOwner = await env.DB.prepare("SELECT device_id FROM roles WHERE role = 'owner' LIMIT 1").first();
-          if (existingOwner) return err(403, "An owner is already set for this project.");
+          // Acts as a permanent recovery key, not a one-time bootstrap: whoever
+          // knows this private code can (re-)claim ownership for their current
+          // device, e.g. after reinstalling the app or switching phones.
           await env.DB.prepare(
             "INSERT INTO roles (device_id, role, code_hash, granted_at) VALUES (?1, 'owner', NULL, ?2) " +
               "ON CONFLICT(device_id) DO UPDATE SET role='owner', granted_at=?2",

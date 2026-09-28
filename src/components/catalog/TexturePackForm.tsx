@@ -3,6 +3,7 @@ import { X, Upload } from "lucide-react";
 import { useRoleStore } from "../../store/useRoleStore";
 import { createTexturePack, updateTexturePack } from "../../lib/catalog";
 import { uploadFile } from "../../lib/upload";
+import { ImageField } from "./ImageField";
 import type { TexturePack } from "../../types";
 
 const RESOLUTIONS: TexturePack["resolution"][] = ["8x", "16x", "32x", "64x"];
@@ -125,14 +126,7 @@ export function TexturePackForm({ existing, onClose, onSaved }: Props) {
               />
             </Field>
           </div>
-          <Field label="Cover image URL (optional)">
-            <input
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://..."
-              className={inputClass}
-            />
-          </Field>
+          <ImageField label="Cover image (optional)" value={imageUrl} onChange={setImageUrl} />
           <Field label={existing ? "Replace .zip (optional)" : "Texture pack .zip"}>
             <FileButton file={zipFile} placeholder={existing ? "Choose new .zip" : "Choose .zip file"} onChange={setZipFile} />
           </Field>

@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import { saveAs } from "file-saver";
+import { saveBlob } from "./saveFile";
 import type { Loader } from "../types";
 import type { ResolvedModEntry } from "./modrinth";
 
@@ -50,5 +50,5 @@ export async function buildModpackZip(
   zip.file("optivault-modpack-info.txt", manifest);
 
   const blob = await zip.generateAsync({ type: "blob" });
-  saveAs(blob, filename ?? `optivault-modpack-${mcVersion}-${loader}.zip`);
+  await saveBlob(blob, filename ?? `optivault-modpack-${mcVersion}-${loader}.zip`);
 }

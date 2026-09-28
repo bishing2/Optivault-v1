@@ -5,4 +5,4 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "optivault"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "92ed56cc-0fac-4dca-8268-b8ae6acd0110"

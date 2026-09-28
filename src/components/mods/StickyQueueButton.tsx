@@ -13,7 +13,7 @@ export function StickyQueueButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+64px)] right-4 z-30 flex items-center gap-2 rounded-full bg-good px-4 py-3 text-[13px] font-bold text-black shadow-lg shadow-black/40 active:scale-95"
+        className="gradient-good glow-good font-display fixed bottom-[calc(env(safe-area-inset-bottom)+64px)] right-4 z-30 flex items-center gap-2 rounded-full px-4 py-3 text-[13px] font-bold text-black active:scale-95"
       >
         <Download size={16} />
         {count} Mods Queued

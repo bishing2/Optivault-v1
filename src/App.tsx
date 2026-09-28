@@ -9,7 +9,7 @@ function App() {
   const [tab, setTab] = useState<Tab>("device");
 
   return (
-    <div className="flex h-dvh flex-col bg-[var(--color-bg)]">
+    <div className="bg-app-glow flex h-dvh flex-col">
       <Header />
       <main className="min-h-0 flex-1 overflow-y-auto">
         {tab === "device" ? <DeviceJvmTab /> : <ModsTab />}

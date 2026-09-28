@@ -69,9 +69,9 @@ export function QueueSheet({ onClose }: Props) {
               <Package size={17} />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 text-sm font-bold text-text">
+              <div className="font-display flex items-center gap-1.5 text-[15px] font-bold text-text">
                 Active Modpack
-                <span className="rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-bold text-accent-light">
+                <span className="gradient-brand rounded-full px-2 py-0.5 text-[10px] font-bold text-white">
                   {modQueue.length} Mods
                 </span>
               </div>
@@ -97,7 +97,7 @@ export function QueueSheet({ onClose }: Props) {
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-surface">
               <div
-                className={`h-full rounded-full ${ramPct > 90 ? "bg-danger" : ramPct > 70 ? "bg-warn" : "bg-accent"}`}
+                className={`h-full rounded-full ${ramPct > 90 ? "gradient-danger" : ramPct > 70 ? "gradient-warn" : "gradient-brand"}`}
                 style={{ width: `${ramPct}%` }}
               />
             </div>
@@ -170,7 +170,7 @@ export function QueueSheet({ onClose }: Props) {
           <button
             onClick={handleBuild}
             disabled={modQueue.length === 0 || build.phase === "resolving" || build.phase === "downloading"}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-good py-3 text-sm font-bold text-black disabled:opacity-40"
+            className="gradient-good glow-good flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-black disabled:opacity-40 disabled:shadow-none"
           >
             {build.phase === "resolving" && (
               <>

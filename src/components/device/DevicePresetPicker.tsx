@@ -21,13 +21,13 @@ export function DevicePresetPicker() {
   }, [brand, query]);
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-4">
+    <div className="rounded-2xl border border-border bg-surface p-4">
       <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-accent-light">
-          <Cpu size={16} />
+        <div className="gradient-brand flex h-9 w-9 items-center justify-center rounded-xl text-white">
+          <Cpu size={17} />
         </div>
         <div>
-          <div className="text-sm font-bold text-text">Select Your Phone Preset</div>
+          <div className="font-display text-[15px] font-bold text-text">Select Your Phone Preset</div>
           <div className="text-[11px] text-text-faint">{DEVICES.length} devices — tap one to calibrate memory, renderer & scaling.</div>
         </div>
       </div>
@@ -49,7 +49,7 @@ export function DevicePresetPicker() {
             onClick={() => setBrand(b)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
               brand === b
-                ? "bg-accent text-white"
+                ? "gradient-brand glow-accent text-white"
                 : "bg-surface-2 text-text-muted hover:text-text"
             }`}
           >
@@ -65,16 +65,16 @@ export function DevicePresetPicker() {
             <button
               key={dv.id}
               onClick={() => selectDevice(dv.id)}
-              className={`rounded-lg border p-3 text-left transition-colors ${
+              className={`rounded-xl border p-3 text-left transition-colors ${
                 active
-                  ? "border-good/60 bg-good-soft"
+                  ? "glow-good border-good/60 bg-good-soft"
                   : "border-border bg-surface-2 hover:border-border-light"
               }`}
             >
               <div className="mb-1 flex items-center justify-between gap-2">
-                <span className="text-sm font-bold text-text">{dv.name}</span>
+                <span className="font-display text-sm font-bold text-text">{dv.name}</span>
                 {active && (
-                  <span className="shrink-0 rounded-full bg-good/20 px-2 py-0.5 text-[10px] font-bold text-good">
+                  <span className="gradient-good shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold text-black">
                     ACTIVE
                   </span>
                 )}
@@ -89,8 +89,8 @@ export function DevicePresetPicker() {
                 <span
                   className={`rounded px-1.5 py-0.5 font-semibold ${
                     dv.renderer === "zink-turnip"
-                      ? "bg-good/10 text-good"
-                      : "bg-accent-soft text-accent-light"
+                      ? "bg-good-soft text-good"
+                      : "bg-cyan-soft text-cyan"
                   }`}
                 >
                   {RENDERER_LABEL[dv.renderer]}

@@ -17,7 +17,7 @@ export function BottomNav({ active, onChange }: Props) {
   ];
 
   return (
-    <nav className="sticky bottom-0 z-30 flex border-t border-[var(--color-border)] bg-[var(--color-bg)]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+    <nav className="sticky bottom-0 z-30 flex border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md">
       {items.map((item) => {
         const isActive = item.id === active;
         const Icon = item.icon;
@@ -25,16 +25,15 @@ export function BottomNav({ active, onChange }: Props) {
           <button
             key={item.id}
             onClick={() => onChange(item.id)}
-            className="relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors"
-            style={{ color: isActive ? "var(--color-good)" : "var(--color-text-faint)" }}
+            className={`relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition-colors ${
+              isActive ? "text-good" : "text-text-faint"
+            }`}
           >
-            {isActive && (
-              <span className="absolute top-0 h-0.5 w-10 rounded-full bg-[var(--color-good)]" />
-            )}
+            {isActive && <span className="gradient-good absolute top-0 h-0.5 w-10 rounded-full" />}
             <span className="relative">
               <Icon size={20} strokeWidth={isActive ? 2.4 : 2} />
               {!!item.badge && (
-                <span className="absolute -right-2 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--color-accent)] px-1 text-[9px] font-bold text-white">
+                <span className="gradient-brand glow-accent absolute -right-2 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-white">
                   {item.badge}
                 </span>
               )}

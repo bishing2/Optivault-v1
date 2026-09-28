@@ -1,35 +1,42 @@
 @import "tailwindcss";
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/inter";
 
 @theme {
-  /* deep slate-violet base, never pure black */
-  --color-bg: #0e0f14;
-  --color-surface: #171922;
-  --color-surface-2: #1e212c;
-  --color-border: #2a2d3a;
-  --color-border-light: #3a3e4f;
+  /* deep indigo-black base, never pure black */
+  --color-bg: #0a0a12;
+  --color-surface: #131420;
+  --color-surface-2: #1a1c2b;
+  --color-surface-3: #222439;
+  --color-border: #262a3d;
+  --color-border-light: #3a3f5c;
 
-  /* muted indigo-violet brand accent */
-  --color-accent: #7c6fee;
-  --color-accent-light: #9b90f5;
-  --color-accent-dark: #6154cf;
-  --color-accent-soft: #26243f;
+  /* violet -> cyan brand accent pair */
+  --color-accent: #8b5cf6;
+  --color-accent-light: #b4a3fb;
+  --color-accent-dark: #6d3ff0;
+  --color-accent-soft: #211c42;
+  --color-cyan: #22d3ee;
+  --color-cyan-soft: #133544;
 
-  /* soft emerald for success/active states */
-  --color-good: #34d399;
-  --color-good-dark: #22b585;
-  --color-good-soft: #16302a;
+  /* teal/emerald for success/active states */
+  --color-good: #2dd4bf;
+  --color-good-dark: #14b8a6;
+  --color-good-soft: #0f2f30;
 
-  /* warm amber + muted rose for warn/danger */
-  --color-warn: #f2b155;
-  --color-warn-soft: #332714;
-  --color-danger: #ef6f6f;
-  --color-danger-soft: #331e1e;
+  /* warm amber + coral rose for warn/danger */
+  --color-warn: #fbbf24;
+  --color-warn-soft: #332a12;
+  --color-danger: #fb7185;
+  --color-danger-soft: #3a1c25;
 
   /* off-white / muted slate text, never pure white */
-  --color-text: #e7e8ee;
-  --color-text-muted: #9599ab;
-  --color-text-faint: #666a7c;
+  --color-text: #eeeef7;
+  --color-text-muted: #9c9fb8;
+  --color-text-faint: #686c87;
 
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -40,12 +47,55 @@ html, body, #root {
 body {
   background: var(--color-bg);
   color: var(--color-text);
+  font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
 
 * {
   box-sizing: border-box;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.bg-app-glow {
+  background:
+    radial-gradient(60% 45% at 15% -10%, rgba(139, 92, 246, 0.22), transparent 60%),
+    radial-gradient(50% 35% at 100% 0%, rgba(34, 211, 238, 0.14), transparent 60%),
+    var(--color-bg);
+}
+
+.gradient-brand {
+  background-image: linear-gradient(135deg, var(--color-accent) 0%, var(--color-cyan) 100%);
+}
+.gradient-good {
+  background-image: linear-gradient(135deg, var(--color-good) 0%, var(--color-cyan) 100%);
+}
+.gradient-warn {
+  background-image: linear-gradient(135deg, var(--color-warn) 0%, #fb923c 100%);
+}
+.gradient-danger {
+  background-image: linear-gradient(135deg, var(--color-danger) 0%, #f43f5e 100%);
+}
+.text-gradient-brand {
+  background-image: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glow-accent {
+  box-shadow:
+    0 0 0 1px rgba(139, 92, 246, 0.35),
+    0 8px 28px -8px rgba(139, 92, 246, 0.55);
+}
+.glow-good {
+  box-shadow:
+    0 0 0 1px rgba(45, 212, 191, 0.35),
+    0 8px 28px -8px rgba(45, 212, 191, 0.55);
 }
 
 ::-webkit-scrollbar {

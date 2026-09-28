@@ -64,29 +64,30 @@ export function ModpackBrowser() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-xl border border-border bg-surface p-4">
-        <div className="mb-1 flex items-center gap-2 text-[11px] font-bold text-accent-light">
+      <div className="relative overflow-hidden rounded-2xl border border-accent/30 bg-surface p-4">
+        <div className="gradient-brand pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full opacity-20 blur-2xl" />
+        <div className="relative mb-1 flex items-center gap-2 text-[11px] font-bold text-cyan">
           <Shield size={13} /> CURATED &amp; MODRINTH CATALOG
           <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold text-text-faint">
             MC {mcVersion} · {loader}
           </span>
         </div>
-        <h2 className="mb-3 text-lg font-extrabold text-text">Active Modpack Browser</h2>
+        <h2 className="font-display relative mb-3 text-xl font-bold text-text">Active Modpack Browser</h2>
 
-        <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-1">
+        <div className="no-scrollbar relative flex gap-1.5 overflow-x-auto pb-1">
           {MODPACK_PRESETS.map((preset) => {
             const Icon = PRESET_ICON[preset.icon as keyof typeof PRESET_ICON] ?? Bolt;
+            const gradientClass =
+              preset.color === "good"
+                ? "gradient-good glow-good text-black"
+                : preset.color === "danger"
+                  ? "gradient-danger text-white"
+                  : "gradient-brand glow-accent text-white";
             return (
               <button
                 key={preset.id}
                 onClick={() => applyPreset(preset.modIds)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
-                  preset.color === "good"
-                    ? "bg-good/15 text-good"
-                    : preset.color === "danger"
-                      ? "bg-danger/15 text-danger"
-                      : "bg-accent-soft text-accent-light"
-                }`}
+                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-transform active:scale-95 ${gradientClass}`}
               >
                 <Icon size={13} /> {preset.label}
               </button>
@@ -99,7 +100,7 @@ export function ModpackBrowser() {
         <button
           onClick={() => setSource("curated")}
           className={`flex-1 rounded-lg py-2 text-xs font-bold transition-colors ${
-            source === "curated" ? "bg-accent text-white" : "text-text-muted"
+            source === "curated" ? "gradient-brand text-white" : "text-text-muted"
           }`}
         >
           Curated Mobile ({CURATED_MODS.length})
@@ -107,7 +108,7 @@ export function ModpackBrowser() {
         <button
           onClick={() => setSource("live")}
           className={`flex-1 rounded-lg py-2 text-xs font-bold transition-colors ${
-            source === "live" ? "bg-accent text-white" : "text-text-muted"
+            source === "live" ? "gradient-brand text-white" : "text-text-muted"
           }`}
         >
           Modrinth Live
@@ -130,7 +131,7 @@ export function ModpackBrowser() {
             <button
               onClick={() => setCategory("all")}
               className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
-                category === "all" ? "bg-accent text-white" : "bg-surface text-text-muted"
+                category === "all" ? "gradient-brand text-white" : "bg-surface text-text-muted"
               }`}
             >
               All Mods ({CURATED_MODS.length})
@@ -140,7 +141,7 @@ export function ModpackBrowser() {
                 key={c.id}
                 onClick={() => setCategory(c.id)}
                 className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
-                  category === c.id ? "bg-accent text-white" : "bg-surface text-text-muted"
+                  category === c.id ? "gradient-brand text-white" : "bg-surface text-text-muted"
                 }`}
               >
                 {c.label}
@@ -195,17 +196,17 @@ export function ModpackBrowser() {
             </div>
             <button
               onClick={runLiveSearch}
-              className="flex items-center gap-1.5 rounded-lg bg-accent px-4 text-xs font-bold text-white"
+              className="gradient-brand glow-accent flex items-center gap-1.5 rounded-lg px-4 text-xs font-bold text-white"
             >
               <Search size={14} /> Search
             </button>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-[11px] text-text-muted">
+          <div className="flex items-center justify-between rounded-lg border border-cyan/20 bg-cyan-soft px-3 py-2 text-[11px] text-cyan">
             <span className="flex items-center gap-1.5">
               <Globe size={13} /> Searching Modrinth live directory for Minecraft {mcVersion} ({loader})
             </span>
-            <span>{liveResults.length} mods found</span>
+            <span className="font-semibold">{liveResults.length} mods found</span>
           </div>
 
           <div className="flex flex-col gap-2.5">

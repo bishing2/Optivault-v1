@@ -28,7 +28,7 @@ export function ModCard({
   return (
     <div
       className={`rounded-xl border p-3.5 transition-colors ${
-        added ? "border-accent/50 bg-accent-soft/40" : "border-border bg-surface"
+        added ? "glow-accent border-accent/60 bg-accent-soft/50" : "border-border bg-surface"
       }`}
     >
       <div className="mb-2 flex items-start gap-2.5">
@@ -36,8 +36,8 @@ export function ModCard({
           <img src={iconUrl} alt="" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
         ) : (
           <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-extrabold text-white"
-            style={{ backgroundColor: iconColor }}
+            className="font-display flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
+            style={{ background: `linear-gradient(135deg, ${iconColor}, ${iconColor}cc)` }}
           >
             {name[0]?.toUpperCase()}
           </div>
@@ -49,7 +49,7 @@ export function ModCard({
         <button
           onClick={onToggle}
           className={`flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
-            added ? "bg-accent text-white" : "bg-surface-2 text-text-muted hover:text-text"
+            added ? "gradient-brand text-white" : "bg-surface-2 text-text-muted hover:text-text"
           }`}
         >
           {added ? <Check size={13} /> : <Plus size={13} />}
@@ -60,7 +60,7 @@ export function ModCard({
       <p className="mb-2 text-[12px] leading-snug text-text-muted">{description}</p>
 
       {tip && (
-        <div className="mb-2 flex items-start gap-1.5 rounded-lg bg-surface-2 px-2.5 py-2 text-[11px] leading-snug text-accent-light">
+        <div className="mb-2 flex items-start gap-1.5 rounded-lg border border-cyan/20 bg-cyan-soft px-2.5 py-2 text-[11px] leading-snug text-cyan">
           <Lightbulb size={13} className="mt-0.5 shrink-0 text-warn" />
           <span>{tip}</span>
         </div>
@@ -68,7 +68,7 @@ export function ModCard({
 
       <div className="flex items-center gap-2 text-[10px] font-semibold text-text-faint">
         {essential && (
-          <span className="rounded bg-good/15 px-1.5 py-0.5 text-good">ESSENTIAL</span>
+          <span className="gradient-good rounded px-1.5 py-0.5 text-black">ESSENTIAL</span>
         )}
         {downloads && (
           <span className="flex items-center gap-1">

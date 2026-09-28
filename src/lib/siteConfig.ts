@@ -1,17 +1,14 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { apiFetch } from "./api";
 
 export async function getSiteLogoUrl(): Promise<string | null> {
-  if (!db) return null;
   try {
-    const snap = await getDoc(doc(db, "siteConfig", "logo"));
-    return snap.exists() ? ((snap.data().url as string) ?? null) : null;
+    const res = await apiFetch<{ url: string | null }>("/api/site-config/logo");
+    return res.url;
   } catch {
     return null;
   }
 }
 
 export async function setSiteLogoUrl(url: string): Promise<void> {
-  if (!db) throw new Error("Firebase isn't configured.");
-  await setDoc(doc(db, "siteConfig", "logo"), { url, updatedAt: Date.now() });
+  await apiFetch("/api/site-config/logo", { method: "PUT", body: JSON.stringify({ url }) });
 }

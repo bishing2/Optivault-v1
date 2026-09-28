@@ -3,11 +3,10 @@ import { Box, Palette } from "lucide-react";
 import { useRoleStore } from "../store/useRoleStore";
 import { useSiteConfigStore } from "../store/useSiteConfigStore";
 import { AccessCodeBar } from "../components/catalog/AccessCodeBar";
-import { DeviceIdNote } from "../components/catalog/DeviceIdNote";
 import { OwnerLogoControl } from "../components/catalog/OwnerLogoControl";
 import { ModpackList } from "../components/catalog/ModpackList";
 import { TexturePackList } from "../components/catalog/TexturePackList";
-import { firebaseEnabled } from "../lib/firebase";
+import { apiEnabled } from "../lib/api";
 
 export function CatalogTab() {
   const [section, setSection] = useState<"modpacks" | "textures">("modpacks");
@@ -15,11 +14,11 @@ export function CatalogTab() {
   const role = useRoleStore((s) => s.role);
   const setLogoUrl = useSiteConfigStore((s) => s.setLogoUrl);
 
-  if (!firebaseEnabled) {
+  if (!apiEnabled) {
     return (
       <div className="p-4">
         <div className="rounded-xl border border-warn/30 bg-warn-soft p-4 text-[12px] text-warn">
-          Firebase isn't configured for this build yet — the community catalog can't load.
+          The backend isn't configured for this build yet — the community catalog can't load.
         </div>
       </div>
     );
@@ -29,7 +28,6 @@ export function CatalogTab() {
     <div className="flex flex-col gap-4 p-4 pb-8">
       <AccessCodeBar />
       {!ready && <div className="text-center text-[11px] text-text-faint">Connecting…</div>}
-      {role === "guest" && <DeviceIdNote />}
       {role === "owner" && <OwnerLogoControl onChanged={setLogoUrl} />}
 
       <div className="flex gap-2 rounded-xl border border-border bg-surface p-1.5">

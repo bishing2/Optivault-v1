@@ -1,8 +1,6 @@
 import { create } from "zustand";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db, auth, ensureSignedIn, firebaseEnabled } from "../lib/firebase";
-import { sha256Hex, generateAccessCode } from "../lib/hash";
-import type { AccessCodeDoc, RoleDoc, UserRole } from "../types";
+import { apiFetch, apiEnabled, currentDeviceId } from "../lib/api";
+import type { UserRole } from "../types";
 
 interface RoleState {
   ready: boolean;
@@ -12,7 +10,7 @@ interface RoleState {
 
   init: () => Promise<void>;
   redeemCode: (plainCode: string) => Promise<{ ok: boolean; message: string }>;
-  generateHelperCode: (label?: string) => Promise<{ ok: boolean; code?: string; message: string }>;
+  generateHelperCode: () => Promise<{ ok: boolean; code?: string; message: string }>;
 }
 
 export const useRoleStore = create<RoleState>((set, get) => ({
@@ -22,76 +20,41 @@ export const useRoleStore = create<RoleState>((set, get) => ({
   error: null,
 
   init: async () => {
-    if (!firebaseEnabled || !db) {
-      set({ ready: true, error: "Firebase isn't configured yet." });
-      return;
-    }
-    const user = await ensureSignedIn();
-    if (!user) {
-      set({ ready: true, error: "Couldn't sign in anonymously." });
+    if (!apiEnabled) {
+      set({ ready: true, error: "Backend isn't configured yet." });
       return;
     }
     try {
-      const roleSnap = await getDoc(doc(db, "roles", user.uid));
-      const role = roleSnap.exists() ? (roleSnap.data() as RoleDoc).role : "guest";
-      set({ ready: true, uid: user.uid, role });
+      const uid = await currentDeviceId();
+      const res = await apiFetch<{ deviceId: string; role: UserRole | "guest" }>("/api/me");
+      set({ ready: true, uid, role: res.role });
     } catch {
-      set({ ready: true, uid: user.uid, role: "guest", error: "Couldn't reach the catalog backend." });
+      set({ ready: true, role: "guest", error: "Couldn't reach the catalog backend." });
     }
   },
 
   redeemCode: async (plainCode: string) => {
-    if (!db) return { ok: false, message: "Firebase isn't configured." };
-    const uid = get().uid;
-    if (!uid) return { ok: false, message: "Not signed in yet — try again in a moment." };
-
-    const codeHash = await sha256Hex(plainCode);
-    const codeSnap = await getDoc(doc(db, "accessCodes", codeHash));
-    if (!codeSnap.exists()) {
-      return { ok: false, message: "That code isn't valid." };
-    }
-    const { role } = codeSnap.data() as AccessCodeDoc;
-
     try {
-      await setDoc(doc(db, "roles", uid), {
-        role,
-        codeHash,
-        grantedAt: Date.now(),
-      } satisfies RoleDoc);
-      set({ role });
-      return { ok: true, message: `Code accepted — you're now a ${role}.` };
-    } catch {
-      return {
-        ok: false,
-        message: "This device already has a role. Ask an owner to change it.",
-      };
+      const res = await apiFetch<{ ok: boolean; role?: UserRole; message: string }>("/api/redeem", {
+        method: "POST",
+        body: JSON.stringify({ code: plainCode }),
+      });
+      if (res.ok && res.role) set({ role: res.role });
+      return { ok: res.ok, message: res.message };
+    } catch (err) {
+      return { ok: false, message: err instanceof Error ? err.message : "Couldn't redeem this code." };
     }
   },
 
-  generateHelperCode: async (label) => {
-    if (!db) return { ok: false, message: "Firebase isn't configured." };
-    const uid = get().uid;
-    if (!uid || get().role !== "owner") {
+  generateHelperCode: async () => {
+    if (get().role !== "owner") {
       return { ok: false, message: "Only the owner can create helper codes." };
     }
-
-    const plainCode = generateAccessCode();
-    const codeHash = await sha256Hex(plainCode);
-
     try {
-      await setDoc(doc(db, "accessCodes", codeHash), {
-        role: "helper",
-        createdBy: uid,
-        createdAt: Date.now(),
-        ...(label ? { label } : {}),
-      } satisfies AccessCodeDoc);
-      return { ok: true, code: plainCode, message: "Share this code once — it won't be shown again." };
-    } catch {
-      return { ok: false, message: "Couldn't create the code. Check your connection and try again." };
+      const res = await apiFetch<{ ok: boolean; code: string }>("/api/codes", { method: "POST", body: "{}" });
+      return { ok: true, code: res.code, message: "Share this code once — it won't be shown again." };
+    } catch (err) {
+      return { ok: false, message: err instanceof Error ? err.message : "Couldn't create the code." };
     }
   },
 }));
-
-export function currentAuthUid(): string | null {
-  return auth?.currentUser?.uid ?? null;
-}

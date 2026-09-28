@@ -7,7 +7,7 @@ import { ModsTab } from "./pages/ModsTab";
 import { CatalogTab } from "./pages/CatalogTab";
 import { useRoleStore } from "./store/useRoleStore";
 import { useSiteConfigStore } from "./store/useSiteConfigStore";
-import { firebaseEnabled } from "./lib/firebase";
+import { apiEnabled } from "./lib/api";
 
 function App() {
   const [tab, setTab] = useState<Tab>("device");
@@ -15,7 +15,7 @@ function App() {
   const loadLogo = useSiteConfigStore((s) => s.loadLogo);
 
   useEffect(() => {
-    if (!firebaseEnabled) return;
+    if (!apiEnabled) return;
     initRole();
     loadLogo();
   }, [initRole, loadLogo]);

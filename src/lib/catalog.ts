@@ -1,32 +1,17 @@
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  increment,
-  orderBy,
-  query,
-  updateDoc,
-} from "firebase/firestore";
-import { db } from "./firebase";
+import { apiFetch } from "./api";
 import type { PrebuiltModpack, TexturePack } from "../types";
 
 export async function listModpacks(): Promise<PrebuiltModpack[]> {
-  if (!db) return [];
   try {
-    const snap = await getDocs(query(collection(db, "modpacks"), orderBy("createdAt", "desc")));
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as PrebuiltModpack);
+    return await apiFetch<PrebuiltModpack[]>("/api/modpacks");
   } catch {
     return [];
   }
 }
 
 export async function listTexturePacks(): Promise<TexturePack[]> {
-  if (!db) return [];
   try {
-    const snap = await getDocs(query(collection(db, "texturePacks"), orderBy("createdAt", "desc")));
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as TexturePack);
+    return await apiFetch<TexturePack[]>("/api/texturepacks");
   } catch {
     return [];
   }
@@ -35,54 +20,35 @@ export async function listTexturePacks(): Promise<TexturePack[]> {
 export async function createModpack(
   data: Omit<PrebuiltModpack, "id" | "downloadCount" | "createdAt" | "updatedAt">,
 ): Promise<void> {
-  if (!db) throw new Error("Firestore isn't configured.");
-  await addDoc(collection(db, "modpacks"), {
-    ...data,
-    downloadCount: 0,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  });
+  await apiFetch("/api/modpacks", { method: "POST", body: JSON.stringify(data) });
 }
 
 export async function updateModpack(id: string, patch: Partial<PrebuiltModpack>): Promise<void> {
-  if (!db) throw new Error("Firestore isn't configured.");
-  await updateDoc(doc(db, "modpacks", id), { ...patch, updatedAt: Date.now() });
+  await apiFetch(`/api/modpacks/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
 }
 
 export async function deleteModpack(id: string): Promise<void> {
-  if (!db) throw new Error("Firestore isn't configured.");
-  await deleteDoc(doc(db, "modpacks", id));
+  await apiFetch(`/api/modpacks/${id}`, { method: "DELETE" });
 }
 
 export async function bumpModpackDownloads(id: string): Promise<void> {
-  if (!db) return;
-  await updateDoc(doc(db, "modpacks", id), { downloadCount: increment(1) }).catch(() => {});
+  await apiFetch(`/api/modpacks/${id}/download`, { method: "POST" }).catch(() => {});
 }
 
 export async function createTexturePack(
   data: Omit<TexturePack, "id" | "downloadCount" | "createdAt" | "updatedAt">,
 ): Promise<void> {
-  if (!db) throw new Error("Firestore isn't configured.");
-  await addDoc(collection(db, "texturePacks"), {
-    ...data,
-    downloadCount: 0,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  });
+  await apiFetch("/api/texturepacks", { method: "POST", body: JSON.stringify(data) });
 }
 
 export async function updateTexturePack(id: string, patch: Partial<TexturePack>): Promise<void> {
-  if (!db) throw new Error("Firestore isn't configured.");
-  await updateDoc(doc(db, "texturePacks", id), { ...patch, updatedAt: Date.now() });
+  await apiFetch(`/api/texturepacks/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
 }
 
 export async function deleteTexturePack(id: string): Promise<void> {
-  if (!db) throw new Error("Firestore isn't configured.");
-  await deleteDoc(doc(db, "texturePacks", id));
+  await apiFetch(`/api/texturepacks/${id}`, { method: "DELETE" });
 }
 
 export async function bumpTexturePackDownloads(id: string): Promise<void> {
-  if (!db) return;
-  await updateDoc(doc(db, "texturePacks", id), { downloadCount: increment(1) }).catch(() => {});
+  await apiFetch(`/api/texturepacks/${id}/download`, { method: "POST" }).catch(() => {});
 }
-

@@ -52,10 +52,3 @@ export async function buildModpackZip(
   const blob = await zip.generateAsync({ type: "blob" });
   saveAs(blob, filename ?? `optivault-modpack-${mcVersion}-${loader}.zip`);
 }
-
-/** Downloads a single Modrinth project's primary file straight to the device. */
-export async function downloadModrinthFile(fileUrl: string, filename: string): Promise<void> {
-  const res = await fetch(fileUrl);
-  const blob = await res.blob();
-  saveAs(blob, filename);
-}

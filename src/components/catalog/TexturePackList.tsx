@@ -1,24 +1,18 @@
 import { useEffect, useState } from "react";
-import { Download, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Download, Pencil, Trash2 } from "lucide-react";
 import { useRoleStore } from "../../store/useRoleStore";
 import { listTexturePacks, deleteTexturePack, bumpTexturePackDownloads } from "../../lib/catalog";
-import { getBestVersion } from "../../lib/modrinth";
-import { downloadModrinthFile } from "../../lib/zipBuilder";
-import { useAppStore } from "../../store/useAppStore";
 import { TexturePackForm } from "./TexturePackForm";
 import type { TexturePack } from "../../types";
 
 export function TexturePackList() {
   const role = useRoleStore((s) => s.role);
   const canManage = role === "owner" || role === "helper";
-  const mcVersion = useAppStore((s) => s.mcVersion);
 
   const [packs, setPacks] = useState<TexturePack[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<TexturePack | null>(null);
-  const [building, setBuilding] = useState<string | null>(null);
-  const [buildError, setBuildError] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -36,23 +30,12 @@ export function TexturePackList() {
     refresh();
   }
 
-  async function handleDownload(pack: TexturePack) {
-    setBuildError(null);
-    setBuilding(pack.id);
-    try {
-      const version = await getBestVersion(pack.modrinthSlug, mcVersion);
-      const file = version?.files.find((f) => f.primary) ?? version?.files[0];
-      if (!file) {
-        setBuildError("This texture pack has no version compatible with your selected MC version.");
-        return;
-      }
-      await downloadModrinthFile(file.url, file.filename);
-      bumpTexturePackDownloads(pack.id);
-    } catch {
-      setBuildError("Couldn't fetch this texture pack right now — check your connection and try again.");
-    } finally {
-      setBuilding(null);
-    }
+  function handleDownload(pack: TexturePack) {
+    // Navigate directly rather than fetch()+blob: GitHub's release CDN doesn't
+    // send CORS headers, but a direct navigation still triggers a native
+    // download (via Content-Disposition) with no host page ever shown.
+    window.open(pack.downloadUrl, "_blank", "noopener");
+    bumpTexturePackDownloads(pack.id);
   }
 
   return (
@@ -74,12 +57,6 @@ export function TexturePackList() {
         </div>
       )}
 
-      {buildError && (
-        <div className="rounded-lg border border-warn/30 bg-warn-soft px-3 py-2 text-[11px] text-warn">
-          {buildError}
-        </div>
-      )}
-
       {packs.map((pack) => (
         <div key={pack.id} className="overflow-hidden rounded-xl border border-border bg-surface">
           {pack.imageUrl && <img src={pack.imageUrl} alt="" className="h-32 w-full object-cover" />}
@@ -98,24 +75,16 @@ export function TexturePackList() {
 
             <div className="mb-3 flex flex-wrap gap-1.5 text-[10px] font-semibold text-text-faint">
               {pack.fpsBoostLabel && <Tag>{pack.fpsBoostLabel}</Tag>}
+              <Tag>{pack.sizeMB}MB</Tag>
               <Tag>{pack.downloadCount} downloads</Tag>
             </div>
 
             <div className="flex gap-2">
               <button
                 onClick={() => handleDownload(pack)}
-                disabled={building === pack.id}
-                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black disabled:opacity-60"
+                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black"
               >
-                {building === pack.id ? (
-                  <>
-                    <Loader2 size={13} className="animate-spin" /> Fetching…
-                  </>
-                ) : (
-                  <>
-                    <Download size={13} /> Download
-                  </>
-                )}
+                <Download size={13} /> Download
               </button>
               {canManage && (
                 <button

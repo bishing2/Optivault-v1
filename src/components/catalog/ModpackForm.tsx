@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { X, Upload, Search, Plus, Trash2 } from "lucide-react";
+import JSZip from "jszip";
+import { X, Upload } from "lucide-react";
 import { MC_VERSIONS, LOADERS } from "../../store/useAppStore";
 import { useRoleStore } from "../../store/useRoleStore";
 import { createModpack, updateModpack } from "../../lib/catalog";
-import { searchModrinth } from "../../lib/modrinth";
-import type { CatalogCategory, Loader, ModrinthSearchHit, PrebuiltModpack } from "../../types";
+import { uploadFile } from "../../lib/upload";
+import type { CatalogCategory, Loader, PrebuiltModpack } from "../../types";
 
 const CATEGORIES: { id: CatalogCategory; label: string }[] = [
   { id: "fps", label: "FPS Boost" },
@@ -29,37 +30,38 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
   const [category, setCategory] = useState<CatalogCategory>(existing?.category ?? "fps");
   const [ramMB, setRamMB] = useState(existing?.ramMB ?? 3500);
   const [imageUrl, setImageUrl] = useState(existing?.imageUrl ?? "");
-  const [selected, setSelected] = useState<{ slug: string; name: string }[]>(
-    existing?.modSlugs.map((slug) => ({ slug, name: slug })) ?? [],
-  );
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ModrinthSearchHit[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [zipFile, setZipFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  async function runSearch() {
-    if (!query.trim()) return;
-    setSearching(true);
-    setResults(await searchModrinth(query.trim(), mcVersion, loader));
-    setSearching(false);
-  }
-
-  function toggleMod(slug: string, modName: string) {
-    setSelected((prev) =>
-      prev.some((m) => m.slug === slug) ? prev.filter((m) => m.slug !== slug) : [...prev, { slug, name: modName }],
-    );
-  }
 
   async function submit() {
     if (!uid) return;
     if (!name.trim()) return setError("Name is required.");
-    if (selected.length === 0) return setError("Add at least one mod from Modrinth.");
+    if (!existing && !zipFile) return setError("A modpack .zip file is required.");
 
     setSaving(true);
     setError(null);
     try {
-      const modSlugs = selected.map((m) => m.slug);
+      let downloadUrl = existing?.downloadUrl ?? "";
+      let sizeMB = existing?.sizeMB ?? 0;
+      let jarCount = existing?.jarCount ?? 0;
+
+      if (zipFile) {
+        setProgress("Reading zip…");
+        sizeMB = Math.round((zipFile.size / (1024 * 1024)) * 10) / 10;
+        try {
+          const zip = await JSZip.loadAsync(zipFile);
+          jarCount = Object.keys(zip.files).filter((n) => n.toLowerCase().endsWith(".jar")).length;
+        } catch {
+          jarCount = existing?.jarCount ?? 0;
+        }
+
+        setProgress("Uploading…");
+        downloadUrl = await uploadFile(zipFile);
+      }
+
+      setProgress("Saving…");
       if (existing) {
         await updateModpack(existing.id, {
           name: name.trim(),
@@ -68,8 +70,10 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
           loader,
           category,
           ramMB,
+          sizeMB,
+          jarCount,
           imageUrl: imageUrl.trim() || null,
-          modSlugs,
+          downloadUrl,
         });
       } else {
         await createModpack({
@@ -81,7 +85,9 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
           loader,
           category,
           ramMB,
-          modSlugs,
+          sizeMB,
+          jarCount,
+          downloadUrl,
           createdBy: uid,
         });
       }
@@ -90,6 +96,7 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
       setError(err instanceof Error ? err.message : "Something went wrong saving this modpack.");
     } finally {
       setSaving(false);
+      setProgress(null);
     }
   }
 
@@ -167,61 +174,9 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
               className={inputClass}
             />
           </Field>
-
-          <Field label={`Mods (${selected.length} selected — built fresh from Modrinth on every download)`}>
-            <div className="flex gap-2">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && runSearch()}
-                placeholder="Search Modrinth mods…"
-                className={inputClass}
-              />
-              <button
-                onClick={runSearch}
-                className="shrink-0 rounded-lg bg-accent-soft px-3 text-accent-light"
-              >
-                <Search size={15} />
-              </button>
-            </div>
+          <Field label={existing ? "Replace .zip (optional)" : "Modpack .zip"}>
+            <FileButton file={zipFile} placeholder={existing ? "Choose new .zip" : "Choose .zip file"} onChange={setZipFile} />
           </Field>
-
-          {selected.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {selected.map((m) => (
-                <span
-                  key={m.slug}
-                  className="flex items-center gap-1 rounded-full border border-accent/30 bg-accent-soft px-2 py-1 text-[11px] font-semibold text-accent-light"
-                >
-                  {m.name}
-                  <button onClick={() => toggleMod(m.slug, m.name)}>
-                    <Trash2 size={11} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {searching && <div className="text-center text-[12px] text-text-faint">Searching…</div>}
-          {!searching && results.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              {results.map((hit) => {
-                const added = selected.some((m) => m.slug === hit.slug);
-                return (
-                  <button
-                    key={hit.project_id}
-                    onClick={() => toggleMod(hit.slug, hit.title)}
-                    className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-[12px] ${
-                      added ? "border-accent/40 bg-accent-soft text-accent-light" : "border-border bg-surface-2 text-text"
-                    }`}
-                  >
-                    <span className="truncate font-semibold">{hit.title}</span>
-                    {added ? <Trash2 size={13} /> : <Plus size={13} />}
-                  </button>
-                );
-              })}
-            </div>
-          )}
 
           {error && <div className="text-[12px] font-semibold text-danger">{error}</div>}
         </div>
@@ -232,7 +187,7 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
             disabled={saving}
             className="gradient-good glow-good flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-black disabled:opacity-50"
           >
-            <Upload size={16} /> {saving ? "Saving…" : existing ? "Save Changes" : "Publish Modpack"}
+            <Upload size={16} /> {progress ?? (existing ? "Save Changes" : "Publish Modpack")}
           </button>
         </div>
       </div>
@@ -248,6 +203,25 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <label className="flex flex-col gap-1">
       <span className="text-[11px] font-semibold text-text-muted">{label}</span>
       {children}
+    </label>
+  );
+}
+
+function FileButton({
+  file,
+  placeholder,
+  onChange,
+}: {
+  file: File | null;
+  placeholder: string;
+  onChange: (f: File | null) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-border-light bg-surface-2 px-3 py-2 text-sm text-text-muted">
+      <span className="truncate">
+        {file ? `${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)` : placeholder}
+      </span>
+      <input type="file" accept=".zip" className="hidden" onChange={(e) => onChange(e.target.files?.[0] ?? null)} />
     </label>
   );
 }

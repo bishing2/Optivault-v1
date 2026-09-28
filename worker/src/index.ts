@@ -1,9 +1,10 @@
 import { type Env, verifyDevice, getRole, sha256Hex, issueDeviceToken, generateAccessCode } from "./auth";
+import { uploadToGithub } from "./github";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, X-Device-Id, X-Device-Token",
+  "Access-Control-Allow-Headers": "Content-Type, X-Device-Id, X-Device-Token, X-Filename",
 };
 
 function json(data: unknown, status = 200): Response {
@@ -28,7 +29,9 @@ function modpackRowToJson(row: any) {
     loader: row.loader,
     category: row.category,
     ramMB: row.ram_mb,
-    modSlugs: JSON.parse(row.mod_slugs),
+    sizeMB: row.size_mb,
+    jarCount: row.jar_count,
+    downloadUrl: row.download_url,
     downloadCount: row.download_count,
     createdBy: row.created_by,
     createdAt: row.created_at,
@@ -45,7 +48,8 @@ function texturePackRowToJson(row: any) {
     imageUrl: row.image_url,
     resolution: row.resolution,
     fpsBoostLabel: row.fps_boost_label ?? undefined,
-    modrinthSlug: row.modrinth_slug,
+    sizeMB: row.size_mb,
+    downloadUrl: row.download_url,
     downloadCount: row.download_count,
     createdBy: row.created_by,
     createdAt: row.created_at,
@@ -126,6 +130,19 @@ export default {
         return json({ ok: true, code: plainCode });
       }
 
+      // --- file uploads (proxied to a GitHub release) ---
+      if (path === "/api/upload" && request.method === "POST") {
+        const role = await getRole(env, deviceId);
+        if (role !== "owner" && role !== "helper") return err(403, "Only owner/helper can upload files.");
+        const filename = request.headers.get("X-Filename");
+        if (!filename) return err(400, "X-Filename header is required.");
+        if (!request.body) return err(400, "Request body is empty.");
+
+        const contentType = request.headers.get("Content-Type") ?? "application/octet-stream";
+        const url = await uploadToGithub(env, filename, contentType, request.body);
+        return json({ ok: true, url });
+      }
+
       // --- modpacks ---
       if (path === "/api/modpacks" && request.method === "GET") {
         const { results } = await env.DB.prepare("SELECT * FROM modpacks ORDER BY created_at DESC").all();
@@ -139,8 +156,8 @@ export default {
         const id = crypto.randomUUID();
         const now = Date.now();
         await env.DB.prepare(
-          `INSERT INTO modpacks (id, name, author_name, description, image_url, mc_version, loader, category, ram_mb, mod_slugs, download_count, created_by, created_at, updated_at)
-           VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,0,?11,?12,?12)`,
+          `INSERT INTO modpacks (id, name, author_name, description, image_url, mc_version, loader, category, ram_mb, size_mb, jar_count, download_url, download_count, created_by, created_at, updated_at)
+           VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,0,?13,?14,?14)`,
         )
           .bind(
             id,
@@ -152,7 +169,9 @@ export default {
             b.loader,
             b.category,
             b.ramMB,
-            JSON.stringify(b.modSlugs ?? []),
+            b.sizeMB ?? 0,
+            b.jarCount ?? 0,
+            b.downloadUrl,
             deviceId,
             now,
           )
@@ -167,7 +186,7 @@ export default {
         const id = modpackIdMatch[1];
         const b = await request.json<any>();
         await env.DB.prepare(
-          `UPDATE modpacks SET name=?1, author_name=?2, description=?3, image_url=?4, mc_version=?5, loader=?6, category=?7, ram_mb=?8, mod_slugs=?9, updated_at=?10 WHERE id=?11`,
+          `UPDATE modpacks SET name=?1, author_name=?2, description=?3, image_url=?4, mc_version=?5, loader=?6, category=?7, ram_mb=?8, size_mb=?9, jar_count=?10, download_url=?11, updated_at=?12 WHERE id=?13`,
         )
           .bind(
             b.name,
@@ -178,7 +197,9 @@ export default {
             b.loader,
             b.category,
             b.ramMB,
-            JSON.stringify(b.modSlugs ?? []),
+            b.sizeMB ?? 0,
+            b.jarCount ?? 0,
+            b.downloadUrl,
             Date.now(),
             id,
           )
@@ -213,8 +234,8 @@ export default {
         const id = crypto.randomUUID();
         const now = Date.now();
         await env.DB.prepare(
-          `INSERT INTO texture_packs (id, name, author_name, description, image_url, resolution, fps_boost_label, modrinth_slug, download_count, created_by, created_at, updated_at)
-           VALUES (?1,?2,?3,?4,?5,?6,?7,?8,0,?9,?10,?10)`,
+          `INSERT INTO texture_packs (id, name, author_name, description, image_url, resolution, fps_boost_label, size_mb, download_url, download_count, created_by, created_at, updated_at)
+           VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,0,?10,?11,?11)`,
         )
           .bind(
             id,
@@ -224,7 +245,8 @@ export default {
             b.imageUrl ?? null,
             b.resolution,
             b.fpsBoostLabel ?? null,
-            b.modrinthSlug,
+            b.sizeMB ?? 0,
+            b.downloadUrl,
             deviceId,
             now,
           )
@@ -239,7 +261,7 @@ export default {
         const id = texIdMatch[1];
         const b = await request.json<any>();
         await env.DB.prepare(
-          `UPDATE texture_packs SET name=?1, author_name=?2, description=?3, image_url=?4, resolution=?5, fps_boost_label=?6, modrinth_slug=?7, updated_at=?8 WHERE id=?9`,
+          `UPDATE texture_packs SET name=?1, author_name=?2, description=?3, image_url=?4, resolution=?5, fps_boost_label=?6, size_mb=?7, download_url=?8, updated_at=?9 WHERE id=?10`,
         )
           .bind(
             b.name,
@@ -248,7 +270,8 @@ export default {
             b.imageUrl ?? null,
             b.resolution,
             b.fpsBoostLabel ?? null,
-            b.modrinthSlug,
+            b.sizeMB ?? 0,
+            b.downloadUrl,
             Date.now(),
             id,
           )

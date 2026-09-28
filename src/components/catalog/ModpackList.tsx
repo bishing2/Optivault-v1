@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { Download, Pencil, Trash2, Package, Plus, Loader2 } from "lucide-react";
+import { Download, Pencil, Trash2, Package, Plus } from "lucide-react";
 import { useRoleStore } from "../../store/useRoleStore";
 import { listModpacks, deleteModpack, bumpModpackDownloads } from "../../lib/catalog";
-import { resolveModpack } from "../../lib/modrinth";
-import { buildModpackZip } from "../../lib/zipBuilder";
 import { ModpackForm } from "./ModpackForm";
 import type { PrebuiltModpack } from "../../types";
 
@@ -23,8 +21,7 @@ export function ModpackList() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<PrebuiltModpack | null>(null);
-  const [building, setBuilding] = useState<string | null>(null);
-  const [buildError, setBuildError] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -42,31 +39,13 @@ export function ModpackList() {
     refresh();
   }
 
-  async function handleDownload(pack: PrebuiltModpack) {
-    setBuildError(null);
-    setBuilding(pack.id);
-    try {
-      const { resolved, incompatible } = await resolveModpack(pack.modSlugs, pack.mcVersion, pack.loader);
-      if (resolved.length === 0) {
-        setBuildError("None of this modpack's mods are compatible with its listed MC version/loader anymore.");
-        return;
-      }
-      await buildModpackZip(
-        resolved,
-        pack.mcVersion,
-        pack.loader,
-        undefined,
-        `${pack.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.zip`,
-      );
-      if (incompatible.length > 0) {
-        setBuildError(`Skipped (no longer available): ${incompatible.join(", ")}`);
-      }
-      bumpModpackDownloads(pack.id);
-    } catch {
-      setBuildError("Couldn't build this modpack right now — check your connection and try again.");
-    } finally {
-      setBuilding(null);
-    }
+  function handleDownload(pack: PrebuiltModpack) {
+    setDownloadError(null);
+    // Navigate directly rather than fetch()+blob: GitHub's release CDN doesn't
+    // send CORS headers, but a direct navigation still triggers a native
+    // download (via Content-Disposition) with no host page ever shown.
+    window.open(pack.downloadUrl, "_blank", "noopener");
+    bumpModpackDownloads(pack.id);
   }
 
   return (
@@ -88,9 +67,9 @@ export function ModpackList() {
         </div>
       )}
 
-      {buildError && (
+      {downloadError && (
         <div className="rounded-lg border border-warn/30 bg-warn-soft px-3 py-2 text-[11px] text-warn">
-          {buildError}
+          {downloadError}
         </div>
       )}
 
@@ -114,25 +93,17 @@ export function ModpackList() {
               <Tag>MC {pack.mcVersion}</Tag>
               <Tag>{pack.loader}</Tag>
               <Tag>{pack.ramMB}MB RAM</Tag>
-              <Tag>{pack.modSlugs.length} mods</Tag>
+              <Tag>{pack.sizeMB}MB</Tag>
+              <Tag>{pack.jarCount} jars</Tag>
               <Tag>{pack.downloadCount} downloads</Tag>
             </div>
 
             <div className="flex gap-2">
               <button
                 onClick={() => handleDownload(pack)}
-                disabled={building === pack.id}
-                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black disabled:opacity-60"
+                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black"
               >
-                {building === pack.id ? (
-                  <>
-                    <Loader2 size={13} className="animate-spin" /> Building…
-                  </>
-                ) : (
-                  <>
-                    <Download size={13} /> Download
-                  </>
-                )}
+                <Download size={13} /> Download
               </button>
               {canManage && (
                 <button

@@ -2,6 +2,8 @@ export interface Env {
   DB: D1Database;
   AUTH_SECRET: string;
   OWNER_SETUP_CODE: string;
+  GITHUB_TOKEN: string;
+  GITHUB_REPO: string;
 }
 
 async function hmacHex(secret: string, message: string): Promise<string> {

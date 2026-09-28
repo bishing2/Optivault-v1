@@ -1,7 +1,7 @@
-import { Smartphone, Package } from "lucide-react";
+import { Smartphone, Package, Boxes } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
 
-export type Tab = "device" | "mods";
+export type Tab = "device" | "mods" | "catalog";
 
 interface Props {
   active: Tab;
@@ -14,6 +14,7 @@ export function BottomNav({ active, onChange }: Props) {
   const items: { id: Tab; label: string; icon: typeof Smartphone; badge?: number }[] = [
     { id: "device", label: "Device & JVM", icon: Smartphone },
     { id: "mods", label: "Mods", icon: Package, badge: queueCount },
+    { id: "catalog", label: "Packs Hub", icon: Boxes },
   ];
 
   return (

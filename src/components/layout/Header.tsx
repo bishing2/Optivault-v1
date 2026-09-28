@@ -1,18 +1,24 @@
 import { Box } from "lucide-react";
 import { useAppStore, MC_VERSIONS, LOADERS } from "../../store/useAppStore";
+import { useSiteConfigStore } from "../../store/useSiteConfigStore";
 
 export function Header() {
   const mcVersion = useAppStore((s) => s.mcVersion);
   const loader = useAppStore((s) => s.loader);
   const setMcVersion = useAppStore((s) => s.setMcVersion);
   const setLoader = useAppStore((s) => s.setLoader);
+  const logoUrl = useSiteConfigStore((s) => s.logoUrl);
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-border bg-bg/90 px-4 py-3 backdrop-blur-md">
       <div className="flex min-w-0 items-center gap-2.5">
-        <div className="gradient-brand glow-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-black">
-          <Box size={19} strokeWidth={2.5} />
-        </div>
+        {logoUrl ? (
+          <img src={logoUrl} alt="" className="glow-accent h-9 w-9 shrink-0 rounded-xl object-cover" />
+        ) : (
+          <div className="gradient-brand glow-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-black">
+            <Box size={19} strokeWidth={2.5} />
+          </div>
+        )}
         <div className="min-w-0 leading-tight">
           <div className="font-display truncate text-[16px] font-bold text-gradient-brand">OptiVault</div>
           <div className="truncate text-[11px] text-text-faint">

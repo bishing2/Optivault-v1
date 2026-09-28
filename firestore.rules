@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasRole(uid, roles) {
+      return exists(/databases/$(database)/documents/roles/$(uid))
+        && get(/databases/$(database)/documents/roles/$(uid)).data.role in roles;
+    }
+
+    function isOwner() {
+      return isSignedIn() && hasRole(request.auth.uid, ['owner']);
+    }
+
+    function isOwnerOrHelper() {
+      return isSignedIn() && hasRole(request.auth.uid, ['owner', 'helper']);
+    }
+
+    // roles/{uid}: grants owner/helper status to a device's anonymous uid.
+    match /roles/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isOwnerOrHelper());
+
+      // Self-serve redemption: a user may create ONLY their own role doc, and
+      // only if the role they claim matches a real access code (by hash).
+      // They cannot fabricate a role — the code lookup is enforced server-side
+      // by these rules, not trusted from the client.
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && !exists(/databases/$(database)/documents/roles/$(uid))
+        && exists(/databases/$(database)/documents/accessCodes/$(request.resource.data.codeHash))
+        && request.resource.data.role ==
+           get(/databases/$(database)/documents/accessCodes/$(request.resource.data.codeHash)).data.role;
+
+      // Only the owner can change or revoke someone's role after the fact.
+      allow update, delete: if isOwner();
+    }
+
+    // accessCodes/{sha256Hash}: doc id IS the hash of the plaintext code, so a
+    // client can only fetch a code's role if it already knows the code.
+    // Listing the collection is blocked so codes can't be enumerated.
+    match /accessCodes/{hash} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow create, delete: if isOwner();
+      allow update: if false;
+    }
+
+    // Community catalog — readable by everyone (guests included), writable
+    // only by owner/helper. Only the owner can delete listings.
+    match /modpacks/{id} {
+      allow read: if true;
+      allow create, update: if isOwnerOrHelper();
+      allow delete: if isOwner();
+    }
+
+    match /texturePacks/{id} {
+      allow read: if true;
+      allow create, update: if isOwnerOrHelper();
+      allow delete: if isOwner();
+    }
+
+    // siteConfig/logo: single doc holding the app logo URL, owner-only write.
+    match /siteConfig/{doc} {
+      allow read: if true;
+      allow write: if isOwner();
+    }
+  }
+}

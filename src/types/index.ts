@@ -86,3 +86,60 @@ export interface QueuedMod {
   iconColor?: string;
   estimatedRamMB: number;
 }
+
+export type UserRole = "owner" | "helper";
+
+export interface RoleDoc {
+  role: UserRole;
+  codeHash: string;
+  grantedAt: number;
+}
+
+export interface AccessCodeDoc {
+  role: UserRole;
+  createdBy: string;
+  createdAt: number;
+  label?: string;
+}
+
+export type CatalogCategory =
+  | "fps"
+  | "shaders"
+  | "potato"
+  | "pvp"
+  | "survival";
+
+export interface PrebuiltModpack {
+  id: string;
+  name: string;
+  authorName: string;
+  description: string;
+  imageUrl?: string | null;
+  mcVersion: string;
+  loader: Loader;
+  category: CatalogCategory;
+  ramMB: number;
+  sizeMB: number;
+  jarCount: number;
+  downloadUrl: string;
+  downloadCount: number;
+  createdBy: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface TexturePack {
+  id: string;
+  name: string;
+  authorName: string;
+  description: string;
+  imageUrl?: string | null;
+  resolution: "8x" | "16x" | "32x" | "64x";
+  sizeMB: number;
+  fpsBoostLabel?: string;
+  downloadUrl: string;
+  downloadCount: number;
+  createdBy: string;
+  createdAt: number;
+  updatedAt: number;
+}

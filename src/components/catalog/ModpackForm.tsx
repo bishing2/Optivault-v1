@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X, Upload } from "lucide-react";
 import { MC_VERSIONS, LOADERS } from "../../store/useAppStore";
 import { useRoleStore } from "../../store/useRoleStore";
-import { createModpack, updateModpack, uploadCatalogFile } from "../../lib/catalog";
+import { createModpack, updateModpack } from "../../lib/catalog";
 import type { CatalogCategory, Loader, PrebuiltModpack } from "../../types";
 
 const CATEGORIES: { id: CatalogCategory; label: string }[] = [
@@ -28,29 +28,20 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
   const [category, setCategory] = useState<CatalogCategory>(existing?.category ?? "fps");
   const [ramMB, setRamMB] = useState(existing?.ramMB ?? 3500);
   const [jarCount, setJarCount] = useState(existing?.jarCount ?? 0);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [zipFile, setZipFile] = useState<File | null>(null);
+  const [sizeMB, setSizeMB] = useState(existing?.sizeMB ?? 0);
+  const [imageUrl, setImageUrl] = useState(existing?.imageUrl ?? "");
+  const [downloadUrl, setDownloadUrl] = useState(existing?.downloadUrl ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
     if (!uid) return;
     if (!name.trim()) return setError("Name is required.");
-    if (!existing && !zipFile) return setError("A modpack .zip is required.");
+    if (!downloadUrl.trim()) return setError("A download link is required (Mediafire, Drive, Discord, GitHub, etc).");
 
     setSaving(true);
     setError(null);
     try {
-      let imageUrl = existing?.imageUrl ?? null;
-      if (imageFile) imageUrl = await uploadCatalogFile("modpacks", imageFile);
-
-      let downloadUrl = existing?.downloadUrl ?? "";
-      let sizeMB = existing?.sizeMB ?? 0;
-      if (zipFile) {
-        downloadUrl = await uploadCatalogFile("modpacks", zipFile);
-        sizeMB = Math.round((zipFile.size / (1024 * 1024)) * 10) / 10;
-      }
-
       if (existing) {
         await updateModpack(existing.id, {
           name: name.trim(),
@@ -60,23 +51,23 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
           category,
           ramMB,
           jarCount,
-          imageUrl,
-          downloadUrl,
           sizeMB,
+          imageUrl: imageUrl.trim() || null,
+          downloadUrl: downloadUrl.trim(),
         });
       } else {
         await createModpack({
           name: name.trim(),
           authorName: "You",
           description: description.trim(),
-          imageUrl,
+          imageUrl: imageUrl.trim() || null,
           mcVersion,
           loader,
           category,
           ramMB,
           jarCount,
           sizeMB,
-          downloadUrl,
+          downloadUrl: downloadUrl.trim(),
           createdBy: uid,
         });
       }
@@ -144,7 +135,7 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
               ))}
             </select>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Field label="RAM (MB)">
               <input
                 type="number"
@@ -161,17 +152,30 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
                 className={inputClass}
               />
             </Field>
+            <Field label="Size (MB)">
+              <input
+                type="number"
+                value={sizeMB}
+                onChange={(e) => setSizeMB(Number(e.target.value))}
+                className={inputClass}
+              />
+            </Field>
           </div>
-          <Field label="Cover image (optional)">
-            <FileButton
-              accept="image/*"
-              file={imageFile}
-              placeholder={existing?.imageUrl ? "Replace image" : "Choose image"}
-              onChange={setImageFile}
+          <Field label="Cover image URL (optional)">
+            <input
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://..."
+              className={inputClass}
             />
           </Field>
-          <Field label={existing ? "Replace .zip (optional)" : "Modpack .zip"}>
-            <FileButton accept=".zip" file={zipFile} placeholder="Choose .zip file" onChange={setZipFile} />
+          <Field label="Download link (Mediafire, Drive, Discord, GitHub…)">
+            <input
+              value={downloadUrl}
+              onChange={(e) => setDownloadUrl(e.target.value)}
+              placeholder="https://..."
+              className={inputClass}
+            />
           </Field>
 
           {error && <div className="text-[12px] font-semibold text-danger">{error}</div>}
@@ -199,30 +203,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <label className="flex flex-col gap-1">
       <span className="text-[11px] font-semibold text-text-muted">{label}</span>
       {children}
-    </label>
-  );
-}
-
-function FileButton({
-  accept,
-  file,
-  placeholder,
-  onChange,
-}: {
-  accept: string;
-  file: File | null;
-  placeholder: string;
-  onChange: (f: File | null) => void;
-}) {
-  return (
-    <label className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-border-light bg-surface-2 px-3 py-2 text-sm text-text-muted">
-      <span className="truncate">{file ? file.name : placeholder}</span>
-      <input
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
-      />
     </label>
   );
 }

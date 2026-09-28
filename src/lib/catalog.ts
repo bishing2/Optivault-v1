@@ -9,8 +9,7 @@ import {
   query,
   updateDoc,
 } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, storage } from "./firebase";
+import { db } from "./firebase";
 import type { PrebuiltModpack, TexturePack } from "../types";
 
 export async function listModpacks(): Promise<PrebuiltModpack[]> {
@@ -31,14 +30,6 @@ export async function listTexturePacks(): Promise<TexturePack[]> {
   } catch {
     return [];
   }
-}
-
-export async function uploadCatalogFile(kind: "modpacks" | "texturepacks", file: File): Promise<string> {
-  if (!storage) throw new Error("Storage isn't configured.");
-  const path = `${kind}/${Date.now()}-${file.name}`;
-  const fileRef = ref(storage, path);
-  await uploadBytes(fileRef, file);
-  return getDownloadURL(fileRef);
 }
 
 export async function createModpack(

@@ -1,13 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 import { getAuth, signInAnonymously, onAuthStateChanged, type User } from "firebase/auth";
 
+// Storage isn't used — it requires the paid Blaze plan even for free-tier
+// usage. Catalog items link to externally-hosted files (Mediafire, Google
+// Drive, Discord, GitHub, etc.) instead, so only Firestore + Auth are needed,
+// both free on the Spark plan.
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
@@ -17,7 +19,6 @@ export const firebaseEnabled = Boolean(firebaseConfig.apiKey && firebaseConfig.p
 const app = firebaseEnabled ? initializeApp(firebaseConfig) : null;
 
 export const db = app ? getFirestore(app) : null;
-export const storage = app ? getStorage(app) : null;
 export const auth = app ? getAuth(app) : null;
 
 let currentUserPromise: Promise<User | null> | null = null;

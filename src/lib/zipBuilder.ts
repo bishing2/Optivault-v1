@@ -14,6 +14,7 @@ export async function buildModpackZip(
   mcVersion: string,
   loader: Loader,
   onProgress?: (p: BuildProgress) => void,
+  filename?: string,
 ): Promise<void> {
   const zip = new JSZip();
   const mods = zip.folder("mods")!;
@@ -49,5 +50,12 @@ export async function buildModpackZip(
   zip.file("optivault-modpack-info.txt", manifest);
 
   const blob = await zip.generateAsync({ type: "blob" });
-  saveAs(blob, `optivault-modpack-${mcVersion}-${loader}.zip`);
+  saveAs(blob, filename ?? `optivault-modpack-${mcVersion}-${loader}.zip`);
+}
+
+/** Downloads a single Modrinth project's primary file straight to the device. */
+export async function downloadModrinthFile(fileUrl: string, filename: string): Promise<void> {
+  const res = await fetch(fileUrl);
+  const blob = await res.blob();
+  saveAs(blob, filename);
 }

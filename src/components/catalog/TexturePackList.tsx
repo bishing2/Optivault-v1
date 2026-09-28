@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react";
-import { Download, Pencil, Trash2, Plus } from "lucide-react";
+import { Download, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useRoleStore } from "../../store/useRoleStore";
 import { listTexturePacks, deleteTexturePack, bumpTexturePackDownloads } from "../../lib/catalog";
+import { getBestVersion } from "../../lib/modrinth";
+import { downloadModrinthFile } from "../../lib/zipBuilder";
+import { useAppStore } from "../../store/useAppStore";
 import { TexturePackForm } from "./TexturePackForm";
 import type { TexturePack } from "../../types";
 
 export function TexturePackList() {
   const role = useRoleStore((s) => s.role);
   const canManage = role === "owner" || role === "helper";
+  const mcVersion = useAppStore((s) => s.mcVersion);
 
   const [packs, setPacks] = useState<TexturePack[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<TexturePack | null>(null);
+  const [building, setBuilding] = useState<string | null>(null);
+  const [buildError, setBuildError] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -31,8 +37,22 @@ export function TexturePackList() {
   }
 
   async function handleDownload(pack: TexturePack) {
-    bumpTexturePackDownloads(pack.id);
-    window.open(pack.downloadUrl, "_blank", "noopener");
+    setBuildError(null);
+    setBuilding(pack.id);
+    try {
+      const version = await getBestVersion(pack.modrinthSlug, mcVersion);
+      const file = version?.files.find((f) => f.primary) ?? version?.files[0];
+      if (!file) {
+        setBuildError("This texture pack has no version compatible with your selected MC version.");
+        return;
+      }
+      await downloadModrinthFile(file.url, file.filename);
+      bumpTexturePackDownloads(pack.id);
+    } catch {
+      setBuildError("Couldn't fetch this texture pack right now — check your connection and try again.");
+    } finally {
+      setBuilding(null);
+    }
   }
 
   return (
@@ -42,7 +62,7 @@ export function TexturePackList() {
           onClick={() => setShowForm(true)}
           className="flex items-center justify-center gap-1.5 rounded-xl border border-accent/30 bg-accent-soft py-2.5 text-xs font-bold text-accent-light"
         >
-          <Plus size={14} /> Add Texture Pack
+          Add Texture Pack
         </button>
       )}
 
@@ -51,6 +71,12 @@ export function TexturePackList() {
       {!loading && packs.length === 0 && (
         <div className="py-10 text-center text-sm text-text-faint">
           No texture packs yet. {canManage ? "Add the first one above." : "Check back soon."}
+        </div>
+      )}
+
+      {buildError && (
+        <div className="rounded-lg border border-warn/30 bg-warn-soft px-3 py-2 text-[11px] text-warn">
+          {buildError}
         </div>
       )}
 
@@ -72,16 +98,24 @@ export function TexturePackList() {
 
             <div className="mb-3 flex flex-wrap gap-1.5 text-[10px] font-semibold text-text-faint">
               {pack.fpsBoostLabel && <Tag>{pack.fpsBoostLabel}</Tag>}
-              <Tag>{pack.sizeMB}MB</Tag>
               <Tag>{pack.downloadCount} downloads</Tag>
             </div>
 
             <div className="flex gap-2">
               <button
                 onClick={() => handleDownload(pack)}
-                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black"
+                disabled={building === pack.id}
+                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black disabled:opacity-60"
               >
-                <Download size={13} /> Download
+                {building === pack.id ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" /> Fetching…
+                  </>
+                ) : (
+                  <>
+                    <Download size={13} /> Download
+                  </>
+                )}
               </button>
               {canManage && (
                 <button

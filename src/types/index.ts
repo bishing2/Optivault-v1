@@ -119,9 +119,7 @@ export interface PrebuiltModpack {
   loader: Loader;
   category: CatalogCategory;
   ramMB: number;
-  sizeMB: number;
-  jarCount: number;
-  downloadUrl: string;
+  modSlugs: string[];
   downloadCount: number;
   createdBy: string;
   createdAt: number;
@@ -135,9 +133,8 @@ export interface TexturePack {
   description: string;
   imageUrl?: string | null;
   resolution: "8x" | "16x" | "32x" | "64x";
-  sizeMB: number;
   fpsBoostLabel?: string;
-  downloadUrl: string;
+  modrinthSlug: string;
   downloadCount: number;
   createdBy: string;
   createdAt: number;

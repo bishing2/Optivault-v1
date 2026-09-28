@@ -50,12 +50,12 @@ export async function searchModrinth(
 export async function getVersionsFor(
   slugOrId: string,
   mcVersion: string,
-  loader: Loader,
+  loader?: Loader,
 ): Promise<ModrinthVersion[]> {
   const params = new URLSearchParams({
-    loaders: JSON.stringify([loader]),
     game_versions: JSON.stringify([mcVersion]),
   });
+  if (loader) params.set("loaders", JSON.stringify([loader]));
   try {
     return await get<ModrinthVersion[]>(
       `/project/${encodeURIComponent(slugOrId)}/version?${params.toString()}`,
@@ -68,7 +68,7 @@ export async function getVersionsFor(
 export async function getBestVersion(
   slugOrId: string,
   mcVersion: string,
-  loader: Loader,
+  loader?: Loader,
 ): Promise<ModrinthVersion | null> {
   const versions = await getVersionsFor(slugOrId, mcVersion, loader);
   if (versions.length === 0) return null;
@@ -79,6 +79,31 @@ export async function getBestVersion(
     return rank(a) - rank(b);
   });
   return releaseFirst[0];
+}
+
+/** Search Modrinth resource packs (texture packs), loader-agnostic. */
+export async function searchModrinthResourcePacks(
+  query: string,
+  mcVersion: string,
+  limit = 20,
+): Promise<ModrinthSearchHit[]> {
+  const facets = JSON.stringify([["project_type:resourcepack"], [`versions:${mcVersion}`]]);
+  const params = new URLSearchParams({ query, facets, limit: String(limit) });
+  try {
+    const data = await get<{ hits: any[] }>(`/search?${params.toString()}`);
+    return data.hits.map((h) => ({
+      project_id: h.project_id,
+      slug: h.slug,
+      title: h.title,
+      description: h.description,
+      author: h.author,
+      downloads: h.downloads,
+      icon_url: h.icon_url,
+      categories: h.display_categories ?? h.categories ?? [],
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export interface ResolvedModEntry {

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Download, Pencil, Trash2, Package, Plus } from "lucide-react";
+import { Download, Pencil, Trash2, Package, Plus, Loader2 } from "lucide-react";
 import { useRoleStore } from "../../store/useRoleStore";
 import { listModpacks, deleteModpack, bumpModpackDownloads } from "../../lib/catalog";
+import { resolveModpack } from "../../lib/modrinth";
+import { buildModpackZip } from "../../lib/zipBuilder";
 import { ModpackForm } from "./ModpackForm";
 import type { PrebuiltModpack } from "../../types";
 
@@ -21,6 +23,8 @@ export function ModpackList() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<PrebuiltModpack | null>(null);
+  const [building, setBuilding] = useState<string | null>(null);
+  const [buildError, setBuildError] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -39,8 +43,30 @@ export function ModpackList() {
   }
 
   async function handleDownload(pack: PrebuiltModpack) {
-    bumpModpackDownloads(pack.id);
-    window.open(pack.downloadUrl, "_blank", "noopener");
+    setBuildError(null);
+    setBuilding(pack.id);
+    try {
+      const { resolved, incompatible } = await resolveModpack(pack.modSlugs, pack.mcVersion, pack.loader);
+      if (resolved.length === 0) {
+        setBuildError("None of this modpack's mods are compatible with its listed MC version/loader anymore.");
+        return;
+      }
+      await buildModpackZip(
+        resolved,
+        pack.mcVersion,
+        pack.loader,
+        undefined,
+        `${pack.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.zip`,
+      );
+      if (incompatible.length > 0) {
+        setBuildError(`Skipped (no longer available): ${incompatible.join(", ")}`);
+      }
+      bumpModpackDownloads(pack.id);
+    } catch {
+      setBuildError("Couldn't build this modpack right now — check your connection and try again.");
+    } finally {
+      setBuilding(null);
+    }
   }
 
   return (
@@ -62,11 +88,15 @@ export function ModpackList() {
         </div>
       )}
 
+      {buildError && (
+        <div className="rounded-lg border border-warn/30 bg-warn-soft px-3 py-2 text-[11px] text-warn">
+          {buildError}
+        </div>
+      )}
+
       {packs.map((pack) => (
         <div key={pack.id} className="overflow-hidden rounded-xl border border-border bg-surface">
-          {pack.imageUrl && (
-            <img src={pack.imageUrl} alt="" className="h-32 w-full object-cover" />
-          )}
+          {pack.imageUrl && <img src={pack.imageUrl} alt="" className="h-32 w-full object-cover" />}
           <div className="p-3.5">
             <div className="mb-1 flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -84,17 +114,25 @@ export function ModpackList() {
               <Tag>MC {pack.mcVersion}</Tag>
               <Tag>{pack.loader}</Tag>
               <Tag>{pack.ramMB}MB RAM</Tag>
-              <Tag>{pack.sizeMB}MB</Tag>
-              <Tag>{pack.jarCount} jars</Tag>
+              <Tag>{pack.modSlugs.length} mods</Tag>
               <Tag>{pack.downloadCount} downloads</Tag>
             </div>
 
             <div className="flex gap-2">
               <button
                 onClick={() => handleDownload(pack)}
-                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black"
+                disabled={building === pack.id}
+                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black disabled:opacity-60"
               >
-                <Download size={13} /> Download
+                {building === pack.id ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" /> Building…
+                  </>
+                ) : (
+                  <>
+                    <Download size={13} /> Download
+                  </>
+                )}
               </button>
               {canManage && (
                 <button

@@ -5,7 +5,6 @@ import { MC_VERSIONS, LOADERS } from "../../store/useAppStore";
 import { useRoleStore } from "../../store/useRoleStore";
 import { createModpack, updateModpack } from "../../lib/catalog";
 import { uploadFile } from "../../lib/upload";
-import { ImageField } from "./ImageField";
 import type { CatalogCategory, Loader, PrebuiltModpack } from "../../types";
 
 const CATEGORIES: { id: CatalogCategory; label: string }[] = [
@@ -167,7 +166,14 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
               />
             </Field>
           </div>
-          <ImageField label="Cover image (optional)" value={imageUrl} onChange={setImageUrl} />
+          <Field label="Cover image URL (optional)">
+            <input
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://..."
+              className={inputClass}
+            />
+          </Field>
           <Field label={existing ? "Replace .zip (optional)" : "Modpack .zip"}>
             <FileButton file={zipFile} placeholder={existing ? "Choose new .zip" : "Choose .zip file"} onChange={setZipFile} />
           </Field>

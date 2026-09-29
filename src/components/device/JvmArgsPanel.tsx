@@ -8,6 +8,7 @@ export function JvmArgsPanel() {
   const device = useAppStore((s) => s.selectedDevice());
   const ramMB = useAppStore((s) => s.ramMB);
   const setRamMB = useAppStore((s) => s.setRamMB);
+  const selectRamVariant = useAppStore((s) => s.selectRamVariant);
   const [copied, setCopied] = useState(false);
 
   if (!device) return null;
@@ -50,14 +51,41 @@ export function JvmArgsPanel() {
             <div className="font-display text-[15px] font-bold text-text">{device.name}</div>
             <div className="text-[11px] text-text-muted">{device.chipset}</div>
             <div className="text-[11px] text-text-faint">
-              GPU: <span className="font-semibold text-text-muted">{device.gpu}</span> · Total RAM:{" "}
-              <span className="font-semibold text-text-muted">{device.ramGB} GB</span>
+              GPU: <span className="font-semibold text-text-muted">{device.gpu}</span>
             </div>
           </div>
           <span className="shrink-0 rounded bg-surface-2 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-text-faint">
             Tier: {device.tier}
           </span>
         </div>
+
+        {device.ramVariantsGB.length > 1 ? (
+          <div className="mb-3">
+            <div className="mb-1.5 text-[11px] font-semibold text-text-muted">
+              Which RAM variant do you have?
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {device.ramVariantsGB.map((gb) => (
+                <button
+                  key={gb}
+                  onClick={() => selectRamVariant(gb)}
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
+                    gb === device.ramGB
+                      ? "gradient-good border-transparent text-black"
+                      : "border-border bg-surface-2 text-text-muted hover:border-border-light"
+                  }`}
+                >
+                  {gb} GB
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="mb-3 text-[11px] text-text-faint">
+            Total RAM: <span className="font-semibold text-text-muted">{device.ramGB} GB</span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between rounded-lg border border-accent/25 bg-accent-soft px-3 py-2 text-[11px] font-semibold text-accent-light">
           <span>Recommended Renderer</span>
           <span>{RENDERER_LABEL[device.renderer]}</span>

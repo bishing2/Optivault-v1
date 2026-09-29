@@ -1,4 +1,4 @@
-import type { DevicePreset, DeviceTier } from "../types";
+import type { DeviceTier, ResolvedDevice } from "../types";
 
 const PAUSE_MILLIS: Record<DeviceTier, number> = {
   flagship: 40,
@@ -30,11 +30,11 @@ function regionSize(ramMB: number): string {
   return "32M";
 }
 
-export function tierLabel(device: DevicePreset): string {
+export function tierLabel(device: ResolvedDevice): string {
   return `${TIER_LABEL[device.tier]} (${device.ramGB}GB ${device.name.split(" / ")[0]})`;
 }
 
-export function buildJvmArgs(device: DevicePreset, ramMB: number): string {
+export function buildJvmArgs(device: ResolvedDevice, ramMB: number): string {
   const pause = PAUSE_MILLIS[device.tier];
   const cores = PROCESSOR_COUNT[device.tier];
   const region = regionSize(ramMB);

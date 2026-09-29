@@ -84,7 +84,7 @@ export function DevicePresetPicker() {
               </div>
               <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
                 <span className="rounded bg-surface px-1.5 py-0.5 font-semibold text-text-muted">
-                  {dv.ramGB}GB RAM
+                  {dv.ramVariantsGB.join("/")}GB RAM
                 </span>
                 <span
                   className={`rounded px-1.5 py-0.5 font-semibold ${
@@ -95,9 +95,7 @@ export function DevicePresetPicker() {
                 >
                   {RENDERER_LABEL[dv.renderer]}
                 </span>
-                <span className="ml-auto font-semibold text-text-faint">
-                  Rec {dv.recommendedRamMB}MB
-                </span>
+                <span className="ml-auto font-semibold uppercase tracking-wide text-text-faint">{dv.tier}</span>
               </div>
             </button>
           );

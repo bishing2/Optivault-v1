@@ -8,14 +8,20 @@ export interface DevicePreset {
   brand: string;
   chipset: string;
   gpu: string;
-  ramGB: number;
+  ramVariantsGB: number[];
   tier: DeviceTier;
   renderer: Renderer;
+  resolutionScaler: number;
+  sustainedPerformance: boolean;
+}
+
+/** A DevicePreset resolved against one chosen RAM variant, with JVM tuning bounds computed for it. */
+export interface ResolvedDevice extends Omit<DevicePreset, "ramVariantsGB"> {
+  ramGB: number;
+  ramVariantsGB: number[];
   recommendedRamMB: number;
   minRamMB: number;
   maxRamMB: number;
-  resolutionScaler: number;
-  sustainedPerformance: boolean;
 }
 
 export type ModCategory =

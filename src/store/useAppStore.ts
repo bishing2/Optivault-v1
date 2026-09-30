@@ -3,26 +3,6 @@ import type { Loader, QueuedMod, ResolvedDevice } from "../types";
 import { DEVICES } from "../data/devices";
 import { ramBoundsFor } from "../lib/ramBounds";
 
-export const MC_VERSIONS = [
-  "1.21.4",
-  "1.21.3",
-  "1.21.1",
-  "1.21",
-  "1.20.6",
-  "1.20.4",
-  "1.20.2",
-  "1.20.1",
-  "1.19.4",
-  "1.19.2",
-  "1.18.2",
-  "1.17.1",
-  "1.16.5",
-  "1.15.2",
-  "1.14.4",
-  "1.12.2",
-  "1.8.9",
-];
-
 export const LOADERS: { id: Loader; label: string }[] = [
   { id: "fabric", label: "Fabric" },
   { id: "forge", label: "Forge" },

@@ -4,8 +4,8 @@ import { DevicePresetPicker } from "../components/device/DevicePresetPicker";
 export function DeviceJvmTab() {
   return (
     <div className="flex flex-col gap-4 p-4 pb-8">
-      <JvmArgsPanel />
       <DevicePresetPicker />
+      <JvmArgsPanel />
     </div>
   );
 }

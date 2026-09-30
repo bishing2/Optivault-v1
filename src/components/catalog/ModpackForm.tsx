@@ -1,10 +1,11 @@
 import { useState } from "react";
 import JSZip from "jszip";
 import { X, Upload } from "lucide-react";
-import { MC_VERSIONS, LOADERS } from "../../store/useAppStore";
+import { LOADERS } from "../../store/useAppStore";
 import { useRoleStore } from "../../store/useRoleStore";
 import { createModpack, updateModpack } from "../../lib/catalog";
 import { uploadFile } from "../../lib/upload";
+import { VersionPicker } from "../common/VersionPicker";
 import type { CatalogCategory, Loader, PrebuiltModpack } from "../../types";
 
 const CATEGORIES: { id: CatalogCategory; label: string }[] = [
@@ -25,7 +26,7 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
   const uid = useRoleStore((s) => s.uid);
   const [name, setName] = useState(existing?.name ?? "");
   const [description, setDescription] = useState(existing?.description ?? "");
-  const [mcVersion, setMcVersion] = useState(existing?.mcVersion ?? MC_VERSIONS[0]);
+  const [mcVersion, setMcVersion] = useState(existing?.mcVersion ?? "1.21.4");
   const [loader, setLoader] = useState<Loader>(existing?.loader ?? "fabric");
   const [category, setCategory] = useState<CatalogCategory>(existing?.category ?? "fps");
   const [ramMB, setRamMB] = useState(existing?.ramMB ?? 3500);
@@ -129,13 +130,7 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="MC Version">
-              <select value={mcVersion} onChange={(e) => setMcVersion(e.target.value)} className={inputClass}>
-                {MC_VERSIONS.map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
-                ))}
-              </select>
+              <VersionPicker value={mcVersion} onChange={setMcVersion} variant="field" />
             </Field>
             <Field label="Loader">
               <select value={loader} onChange={(e) => setLoader(e.target.value as Loader)} className={inputClass}>

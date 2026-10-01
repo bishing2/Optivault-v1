@@ -75,7 +75,7 @@ body {
      stays visible (and worth being translucent over) all the way down the
      scrolling content, not just near the top of the viewport. */
   background:
-    linear-gradient(180deg, rgba(8, 9, 10, 0.1) 0%, rgba(8, 9, 10, 0.3) 100%),
+    linear-gradient(180deg, rgba(8, 9, 10, 0.25) 0%, rgba(8, 9, 10, 0.45) 100%),
     url("/bg/neon-glow.webp");
   background-size: cover, cover;
   background-position: top center, top center;
@@ -115,34 +115,32 @@ body {
 
 /* Frosted glass chrome — translucent surface + soft contour glow, liquid-glass style */
 .glass {
-  background: rgba(17, 19, 18, 0.55);
-  backdrop-filter: blur(28px) saturate(150%);
-  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  background: rgba(17, 19, 18, 0.6);
+  backdrop-filter: blur(28px) saturate(108%);
+  -webkit-backdrop-filter: blur(28px) saturate(108%);
 }
 /* Stronger blur for overlay sheets, where it sits over the busiest part of the background art */
 .glass-strong {
-  background: rgba(14, 16, 15, 0.7);
-  backdrop-filter: blur(48px) saturate(160%);
-  -webkit-backdrop-filter: blur(48px) saturate(160%);
+  background: rgba(14, 16, 15, 0.75);
+  backdrop-filter: blur(48px) saturate(108%);
+  -webkit-backdrop-filter: blur(48px) saturate(108%);
 }
 /* ColorOS-style contour glow: a bright rim catching light top-left, cool accent bounce
-   bottom-right, plus a thin accent outline and soft outer bloom. */
+   bottom-right, plus a thin accent outline and soft outer bloom — kept subtle. */
 .glass-contour {
   box-shadow:
-    inset 1.5px 1.5px 0 -0.5px rgba(255, 255, 255, 0.5),
-    inset -1px -1px 0 -0.5px rgba(34, 197, 94, 0.3),
-    inset 0 0 20px -8px rgba(74, 222, 128, 0.25),
-    0 0 0 1px rgba(34, 197, 94, 0.2),
-    0 2px 10px -2px rgba(74, 222, 128, 0.25),
-    0 14px 50px -14px rgba(34, 197, 94, 0.5);
+    inset 1.5px 1.5px 0 -0.5px rgba(255, 255, 255, 0.4),
+    inset -1px -1px 0 -0.5px rgba(34, 197, 94, 0.14),
+    0 0 0 1px rgba(34, 197, 94, 0.1),
+    0 10px 36px -16px rgba(34, 197, 94, 0.28);
 }
 
 /* Every card/surface in the app becomes part of the glass system */
 .bg-surface,
 .bg-surface-2,
 .bg-surface-3 {
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(108%);
+  -webkit-backdrop-filter: blur(18px) saturate(108%);
 }
 
 ::-webkit-scrollbar {

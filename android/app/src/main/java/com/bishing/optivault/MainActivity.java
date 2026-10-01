@@ -1,5 +1,12 @@
 package com.bishing.optivault;
 
+import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
 
-public class MainActivity extends BridgeActivity {}
+public class MainActivity extends BridgeActivity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(FolderStoragePlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+}

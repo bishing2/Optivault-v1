@@ -4,6 +4,7 @@ import { useRoleStore } from "../store/useRoleStore";
 import { useSiteConfigStore } from "../store/useSiteConfigStore";
 import { AccessCodeBar } from "../components/catalog/AccessCodeBar";
 import { OwnerLogoControl } from "../components/catalog/OwnerLogoControl";
+import { DownloadFolderControl } from "../components/catalog/DownloadFolderControl";
 import { ModpackList } from "../components/catalog/ModpackList";
 import { TexturePackList } from "../components/catalog/TexturePackList";
 import { apiEnabled } from "../lib/api";
@@ -29,6 +30,7 @@ export function CatalogTab() {
       <AccessCodeBar />
       {!ready && <div className="text-center text-[11px] text-text-faint">Connecting…</div>}
       {role === "owner" && <OwnerLogoControl onChanged={setLogoUrl} />}
+      <DownloadFolderControl />
 
       <div className="flex gap-2 rounded-xl border border-border bg-surface p-1.5">
         <button

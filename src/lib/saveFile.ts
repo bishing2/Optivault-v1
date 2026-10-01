@@ -2,6 +2,8 @@ import { saveAs } from "file-saver";
 import { Capacitor } from "@capacitor/core";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
+import FolderStorage, { ensureDownloadFolder } from "./folderStorage";
+import { notifyDownloadComplete } from "./notify";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -25,6 +27,15 @@ export async function saveBlob(blob: Blob, filename: string): Promise<void> {
   }
 
   const base64 = await blobToBase64(blob);
+
+  const folder = await ensureDownloadFolder();
+  if (folder) {
+    await FolderStorage.writeFile({ folderUri: folder.uri, filename, data: base64, mimeType: "application/zip" });
+    await notifyDownloadComplete(filename, folder.name);
+    return;
+  }
+
+  // User cancelled the folder picker — fall back to the share sheet.
   const written = await Filesystem.writeFile({
     path: filename,
     data: base64,

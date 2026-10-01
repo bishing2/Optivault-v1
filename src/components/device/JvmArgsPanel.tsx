@@ -46,7 +46,7 @@ export function JvmArgsPanel() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="glass-contour rounded-2xl border border-border bg-surface p-4">
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
             <div className="font-display text-[15px] font-bold text-text">{device.name}</div>
@@ -96,7 +96,7 @@ export function JvmArgsPanel() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="glass-contour rounded-2xl border border-border bg-surface p-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-sm font-bold text-text">
             <Sliders size={15} className="text-accent-light" /> Pojav Allocated RAM
@@ -121,7 +121,7 @@ export function JvmArgsPanel() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="glass-contour rounded-2xl border border-border bg-surface p-4">
         <div className="mb-2 flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-[12px] font-bold text-text">
             <Terminal size={14} className="text-accent-light" /> JVM Arguments
@@ -140,7 +140,7 @@ export function JvmArgsPanel() {
         </pre>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="glass-contour rounded-2xl border border-border bg-surface p-4">
         <div className="mb-2 flex items-center gap-1.5 text-[12px] font-bold text-text">
           <Lightbulb size={14} className="text-warn" /> PojavLauncher Calibration Settings
         </div>

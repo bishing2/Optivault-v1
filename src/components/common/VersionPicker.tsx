@@ -43,7 +43,7 @@ export function VersionPicker({ value, onChange, variant = "compact" }: Props) {
         createPortal(
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60" onClick={() => setOpen(false)}>
           <div
-            className="glass glass-contour flex max-h-[75vh] w-full flex-col rounded-t-2xl border-t border-border"
+            className="glass-strong glass-contour flex max-h-[75vh] w-full flex-col rounded-t-2xl border-t border-border"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-border p-4">

@@ -131,7 +131,7 @@ export function ModpackList() {
       {!loading && visible.length > 0 && (
         <div className="grid grid-cols-2 gap-2.5">
           {visible.map((pack) => (
-            <div key={pack.id} className="overflow-hidden rounded-xl border border-border bg-surface">
+            <div key={pack.id} className="glass-contour overflow-hidden rounded-xl border border-border bg-surface">
               {pack.imageUrl ? (
                 <img src={pack.imageUrl} alt="" className="h-20 w-full object-cover" />
               ) : (

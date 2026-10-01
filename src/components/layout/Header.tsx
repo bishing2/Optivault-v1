@@ -1,6 +1,7 @@
-import { useAppStore, LOADERS } from "../../store/useAppStore";
+import { useAppStore } from "../../store/useAppStore";
 import { useSiteConfigStore } from "../../store/useSiteConfigStore";
 import { VersionPicker } from "../common/VersionPicker";
+import { LoaderPicker } from "../common/LoaderPicker";
 
 export function Header() {
   const mcVersion = useAppStore((s) => s.mcVersion);
@@ -27,17 +28,7 @@ export function Header() {
 
       <div className="flex shrink-0 items-center gap-1.5">
         <VersionPicker value={mcVersion} onChange={setMcVersion} variant="compact" />
-        <select
-          value={loader}
-          onChange={(e) => setLoader(e.target.value as any)}
-          className="rounded-lg border border-border bg-surface px-2 py-1.5 text-xs font-semibold text-text outline-none"
-        >
-          {LOADERS.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.label}
-            </option>
-          ))}
-        </select>
+        <LoaderPicker value={loader} onChange={setLoader} />
       </div>
     </header>
   );

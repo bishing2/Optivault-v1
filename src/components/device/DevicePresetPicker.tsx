@@ -27,7 +27,7 @@ export function DevicePresetPicker() {
   }, [brand, query]);
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4">
+    <div className="glass-contour rounded-2xl border border-border bg-surface p-4">
       <div className="mb-3 flex items-center gap-2">
         <div className="gradient-brand flex h-9 w-9 items-center justify-center rounded-xl text-black">
           <Cpu size={17} />

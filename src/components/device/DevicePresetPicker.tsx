@@ -3,14 +3,17 @@ import { Search, Cpu, RotateCw } from "lucide-react";
 import { DEVICES, BRANDS, RENDERER_LABEL } from "../../data/devices";
 import { useAppStore } from "../../store/useAppStore";
 import { AutoDetectBanner, clearAutoDetectDismissal } from "./AutoDetectBanner";
+import { ManualDeviceSheet } from "./ManualDeviceSheet";
 import { tapHaptic } from "../../lib/haptics";
 
 export function DevicePresetPicker() {
   const [brand, setBrand] = useState("All");
   const [query, setQuery] = useState("");
   const [detectNonce, setDetectNonce] = useState(0);
+  const [manualOpen, setManualOpen] = useState(false);
   const selectedDeviceId = useAppStore((s) => s.selectedDeviceId);
   const selectDevice = useAppStore((s) => s.selectDevice);
+  const customDevice = useAppStore((s) => (s.selectedDeviceId === "custom" ? s.device : null));
 
   const filtered = useMemo(() => {
     return DEVICES.filter((dv) => {
@@ -57,6 +60,25 @@ export function DevicePresetPicker() {
           className="w-full rounded-lg border border-border bg-surface-2 py-2.5 pl-9 pr-3 text-sm text-text outline-none placeholder:text-text-faint focus:border-accent"
         />
       </div>
+
+      <button
+        onClick={() => setManualOpen(true)}
+        className="mb-3 w-full rounded-lg border border-dashed border-border-light bg-surface-2 py-2 text-center text-[11px] font-bold text-accent-light"
+      >
+        Phone not listed? Search your chipset instead
+      </button>
+
+      {customDevice && (
+        <div className="glow-good mb-3 flex items-center justify-between rounded-xl border border-good/60 bg-good-soft p-3">
+          <div>
+            <div className="text-[13px] font-bold text-text">{customDevice.name}</div>
+            <div className="text-[11px] text-text-muted">
+              {customDevice.chipset} · {customDevice.ramGB}GB RAM
+            </div>
+          </div>
+          <span className="gradient-good shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold text-black">ACTIVE</span>
+        </div>
+      )}
 
       <div className="no-scrollbar mb-3 flex gap-1.5 overflow-x-auto pb-1">
         {BRANDS.map((b) => (
@@ -123,6 +145,8 @@ export function DevicePresetPicker() {
           <div className="py-8 text-center text-sm text-text-faint">No devices match your search.</div>
         )}
       </div>
+
+      {manualOpen && <ManualDeviceSheet onClose={() => setManualOpen(false)} />}
     </div>
   );
 }

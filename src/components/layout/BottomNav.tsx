@@ -19,7 +19,7 @@ export function BottomNav({ active, onChange }: Props) {
   ];
 
   return (
-    <nav className="sticky bottom-0 z-30 flex border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md">
+    <nav className="glass glass-contour sticky bottom-0 z-30 flex border-t border-border pb-[env(safe-area-inset-bottom)]">
       {items.map((item) => {
         const isActive = item.id === active;
         const Icon = item.icon;

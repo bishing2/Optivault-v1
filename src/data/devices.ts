@@ -6,7 +6,7 @@ const GL4ES = "gl4es-virgl" as const;
 type Renderer = DevicePreset["renderer"];
 type Tier = DevicePreset["tier"];
 
-interface ChipsetProfile {
+export interface ChipsetProfile {
   label: string;
   gpu: string;
   tier: Tier;
@@ -27,7 +27,7 @@ function chip(
 }
 
 // Qualcomm / MediaTek / Samsung / Google / Unisoc chipsets, mapped to a tuning profile.
-const CHIPSETS = {
+export const CHIPSETS = {
   // Snapdragon flagship
   sd8elite: chip("Snapdragon 8 Elite", "Adreno 830", "flagship", ZINK, 100, true),
   sd8gen3: chip("Snapdragon 8 Gen 3", "Adreno 750", "flagship", ZINK, 100, true),

@@ -60,7 +60,7 @@ export function QueueSheet({ onClose }: Props) {
   return (
     <div className="fixed inset-0 z-40 flex flex-col justify-end bg-black/60" onClick={onClose}>
       <div
-        className="flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-surface"
+        className="glass glass-contour flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border p-4">

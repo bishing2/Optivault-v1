@@ -23,6 +23,7 @@ interface AppState {
   setMcVersion: (v: string) => void;
   setLoader: (l: Loader) => void;
   selectDevice: (id: string) => void;
+  selectCustomDevice: (device: ResolvedDevice) => void;
   selectRamVariant: (ramGB: number) => void;
   setRamMB: (mb: number) => void;
 
@@ -67,6 +68,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     const ramGB = device.ramVariantsGB[device.ramVariantsGB.length - 1];
     const resolved = resolveDevice(id, ramGB);
     set({ selectedDeviceId: id, selectedRamGB: ramGB, device: resolved, ramMB: resolved.recommendedRamMB });
+  },
+
+  selectCustomDevice: (device) => {
+    set({ selectedDeviceId: device.id, selectedRamGB: device.ramGB, device, ramMB: device.recommendedRamMB });
   },
 
   selectRamVariant: (ramGB) => {

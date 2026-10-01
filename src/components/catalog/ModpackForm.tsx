@@ -104,7 +104,7 @@ export function ModpackForm({ existing, onClose, onSaved }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60" onClick={onClose}>
       <div
-        className="flex max-h-[88vh] w-full flex-col rounded-t-2xl border-t border-border bg-surface"
+        className="glass glass-contour flex max-h-[88vh] w-full flex-col rounded-t-2xl border-t border-border"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border p-4">

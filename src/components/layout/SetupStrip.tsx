@@ -13,7 +13,7 @@ export function SetupStrip({ onJump }: Props) {
   return (
     <button
       onClick={onJump}
-      className="flex items-center gap-2.5 border-b border-border bg-surface-2 px-4 py-2 text-left"
+      className="glass flex items-center gap-2.5 border-b border-border px-4 py-2 text-left"
     >
       <Smartphone size={13} className="shrink-0 text-accent-light" />
       <span className="truncate text-[11.5px] font-bold text-text">{device.name.split(" / ")[0]}</span>

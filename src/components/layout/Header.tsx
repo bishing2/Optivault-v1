@@ -10,7 +10,7 @@ export function Header() {
   const logoUrl = useSiteConfigStore((s) => s.logoUrl);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-border bg-bg/90 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-md">
+    <header className="glass glass-contour sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-border px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
       <div className="flex min-w-0 items-center gap-2.5">
         <img
           src={logoUrl || "/app-icon.png"}

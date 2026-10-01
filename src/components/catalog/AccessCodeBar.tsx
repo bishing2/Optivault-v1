@@ -36,7 +36,7 @@ export function AccessCodeBar() {
   const roleLabel = role === "owner" ? "Owner" : role === "helper" ? "Helper" : "Guest Mode";
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4">
+    <div className="glass-contour rounded-2xl border border-border bg-surface p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-2 text-text-muted">

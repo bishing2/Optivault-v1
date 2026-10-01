@@ -65,7 +65,7 @@ export function ModpackBrowser() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="glass-contour rounded-2xl border border-border bg-surface p-4">
         <div className="mb-1 flex items-center gap-2 text-[11px] font-bold text-accent-light">
           <Shield size={13} /> CURATED &amp; MODRINTH CATALOG
           <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold text-text-faint">

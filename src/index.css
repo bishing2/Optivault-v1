@@ -18,9 +18,9 @@
 @theme {
   /* near-black base, minimal */
   --color-bg: #08090a;
-  --color-surface: rgba(17, 19, 18, 0.58);
-  --color-surface-2: rgba(23, 25, 23, 0.66);
-  --color-surface-3: rgba(30, 33, 31, 0.74);
+  --color-surface: rgba(20, 24, 22, 0.32);
+  --color-surface-2: rgba(24, 28, 26, 0.4);
+  --color-surface-3: rgba(30, 35, 32, 0.5);
   --color-border: #22251f;
   --color-border-light: #33372f;
 
@@ -71,8 +71,11 @@ body {
 }
 
 .bg-app-glow {
+  /* A light, constant darkening — not a fade to opaque black — so the art
+     stays visible (and worth being translucent over) all the way down the
+     scrolling content, not just near the top of the viewport. */
   background:
-    linear-gradient(180deg, rgba(8, 9, 10, 0.25) 0%, rgba(8, 9, 10, 0.55) 40%, var(--color-bg) 85%),
+    linear-gradient(180deg, rgba(8, 9, 10, 0.1) 0%, rgba(8, 9, 10, 0.3) 100%),
     url("/bg/neon-glow.webp");
   background-size: cover, cover;
   background-position: top center, top center;

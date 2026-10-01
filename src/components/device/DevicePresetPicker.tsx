@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
-import { Search, Cpu } from "lucide-react";
+import { Search, Cpu, RotateCw } from "lucide-react";
 import { DEVICES, BRANDS, RENDERER_LABEL } from "../../data/devices";
 import { useAppStore } from "../../store/useAppStore";
+import { AutoDetectBanner, clearAutoDetectDismissal } from "./AutoDetectBanner";
+import { tapHaptic } from "../../lib/haptics";
 
 export function DevicePresetPicker() {
   const [brand, setBrand] = useState("All");
   const [query, setQuery] = useState("");
+  const [detectNonce, setDetectNonce] = useState(0);
   const selectedDeviceId = useAppStore((s) => s.selectedDeviceId);
   const selectDevice = useAppStore((s) => s.selectDevice);
 
@@ -26,10 +29,23 @@ export function DevicePresetPicker() {
         <div className="gradient-brand flex h-9 w-9 items-center justify-center rounded-xl text-black">
           <Cpu size={17} />
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <div className="font-display text-[15px] font-bold text-text">Select Your Phone Preset</div>
           <div className="text-[11px] text-text-faint">{DEVICES.length} devices — tap one to calibrate memory, renderer & scaling.</div>
         </div>
+        <button
+          onClick={() => {
+            clearAutoDetectDismissal();
+            setDetectNonce((n) => n + 1);
+          }}
+          className="flex shrink-0 items-center gap-1 rounded-lg border border-border-light px-2 py-1.5 text-[10px] font-bold text-text-muted"
+        >
+          <RotateCw size={11} /> Detect
+        </button>
+      </div>
+
+      <div className="mb-3">
+        <AutoDetectBanner key={detectNonce} />
       </div>
 
       <div className="relative mb-3">
@@ -64,7 +80,10 @@ export function DevicePresetPicker() {
           return (
             <button
               key={dv.id}
-              onClick={() => selectDevice(dv.id)}
+              onClick={() => {
+                tapHaptic();
+                selectDevice(dv.id);
+              }}
               className={`rounded-xl border p-3 text-left transition-colors ${
                 active
                   ? "glow-good border-good/60 bg-good-soft"

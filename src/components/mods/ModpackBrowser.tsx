@@ -6,6 +6,7 @@ import { useAppStore } from "../../store/useAppStore";
 import { ModCard } from "./ModCard";
 import { estimateCuratedModRam, DEFAULT_MODRINTH_MOD_RAM_MB } from "../../lib/ramEstimate";
 import { searchModrinth } from "../../lib/modrinth";
+import { tapHaptic } from "../../lib/haptics";
 import type { ModCategory, ModrinthSearchHit } from "../../types";
 
 const PRESET_ICON = { bolt: Bolt, globe: Globe, cross: Swords, sparkles: Sparkles } as const;
@@ -154,19 +155,22 @@ export function ModpackBrowser() {
                 downloads={mod.downloads}
                 iconColor={mod.iconColor}
                 added={isQueued(mod.id)}
-                onToggle={() =>
-                  isQueued(mod.id)
-                    ? removeMod(mod.id)
-                    : addMod({
-                        id: mod.id,
-                        slug: mod.slug,
-                        name: mod.name,
-                        author: mod.author,
-                        source: "curated",
-                        iconColor: mod.iconColor,
-                        estimatedRamMB: estimateCuratedModRam(mod),
-                      })
-                }
+                onToggle={() => {
+                  tapHaptic();
+                  if (isQueued(mod.id)) {
+                    removeMod(mod.id);
+                  } else {
+                    addMod({
+                      id: mod.id,
+                      slug: mod.slug,
+                      name: mod.name,
+                      author: mod.author,
+                      source: "curated",
+                      iconColor: mod.iconColor,
+                      estimatedRamMB: estimateCuratedModRam(mod),
+                    });
+                  }
+                }}
               />
             ))}
             {filteredCurated.length === 0 && (
@@ -216,19 +220,22 @@ export function ModpackBrowser() {
                   downloads={formatDownloads(hit.downloads)}
                   iconUrl={hit.icon_url}
                   added={isQueued(hit.project_id)}
-                  onToggle={() =>
-                    isQueued(hit.project_id)
-                      ? removeMod(hit.project_id)
-                      : addMod({
-                          id: hit.project_id,
-                          slug: hit.slug,
-                          name: hit.title,
-                          author: hit.author,
-                          source: "modrinth",
-                          iconUrl: hit.icon_url,
-                          estimatedRamMB: DEFAULT_MODRINTH_MOD_RAM_MB,
-                        })
-                  }
+                  onToggle={() => {
+                    tapHaptic();
+                    if (isQueued(hit.project_id)) {
+                      removeMod(hit.project_id);
+                    } else {
+                      addMod({
+                        id: hit.project_id,
+                        slug: hit.slug,
+                        name: hit.title,
+                        author: hit.author,
+                        source: "modrinth",
+                        iconUrl: hit.icon_url,
+                        estimatedRamMB: DEFAULT_MODRINTH_MOD_RAM_MB,
+                      });
+                    }
+                  }}
                 />
               ))}
             {!searching && searched && liveResults.length === 0 && (

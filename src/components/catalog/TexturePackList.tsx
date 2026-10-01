@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react";
-import { Download, Pencil, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Download, Pencil, Trash2, ArrowUpDown, ChevronDown } from "lucide-react";
 import { useRoleStore } from "../../store/useRoleStore";
 import { listTexturePacks, deleteTexturePack, bumpTexturePackDownloads } from "../../lib/catalog";
+import { downloadToDevice } from "../../lib/download";
+import { tapHaptic } from "../../lib/haptics";
 import { TexturePackForm } from "./TexturePackForm";
+import { SkeletonCardGrid } from "./SkeletonCard";
+import { PullToRefresh } from "../common/PullToRefresh";
 import type { TexturePack } from "../../types";
+
+type SortKey = "newest" | "downloads" | "smallest";
+const SORT_LABEL: Record<SortKey, string> = { newest: "Newest", downloads: "Most Downloaded", smallest: "Smallest" };
 
 export function TexturePackList() {
   const role = useRoleStore((s) => s.role);
@@ -13,6 +20,9 @@ export function TexturePackList() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<TexturePack | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [resFilter, setResFilter] = useState("All");
+  const [sort, setSort] = useState<SortKey>("newest");
 
   async function refresh() {
     setLoading(true);
@@ -24,21 +34,37 @@ export function TexturePackList() {
     refresh();
   }, []);
 
+  const resolutions = useMemo(() => ["All", ...Array.from(new Set(packs.map((p) => p.resolution)))], [packs]);
+
+  const visible = useMemo(() => {
+    let list = packs;
+    if (resFilter !== "All") list = list.filter((p) => p.resolution === resFilter);
+    const sorted = [...list];
+    if (sort === "downloads") sorted.sort((a, b) => b.downloadCount - a.downloadCount);
+    else if (sort === "smallest") sorted.sort((a, b) => a.sizeMB - b.sizeMB);
+    else sorted.sort((a, b) => b.createdAt - a.createdAt);
+    return sorted;
+  }, [packs, resFilter, sort]);
+
   async function handleDelete(id: string) {
     if (!confirm("Delete this texture pack for everyone? This can't be undone.")) return;
     await deleteTexturePack(id);
     refresh();
   }
 
-  function handleDownload(pack: TexturePack) {
-    // Navigate directly rather than fetch()+blob: GitHub's release CDN doesn't
-    // send CORS headers, but a direct navigation still triggers a native
-    // download (via Content-Disposition) with no host page ever shown.
-    window.open(pack.downloadUrl, "_blank", "noopener");
-    bumpTexturePackDownloads(pack.id);
+  async function handleDownload(pack: TexturePack) {
+    tapHaptic();
+    setDownloadError(null);
+    try {
+      await downloadToDevice(pack.downloadUrl, `${pack.name}.zip`);
+      bumpTexturePackDownloads(pack.id);
+    } catch (err) {
+      setDownloadError(err instanceof Error ? err.message : "Download failed.");
+    }
   }
 
   return (
+    <PullToRefresh onRefresh={refresh}>
     <div className="flex flex-col gap-3">
       {canManage && (
         <button
@@ -49,7 +75,38 @@ export function TexturePackList() {
         </button>
       )}
 
-      {loading && <div className="py-8 text-center text-sm text-text-faint">Loading texture packs…</div>}
+      {!loading && packs.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <FilterPill label={resFilter}>
+            <select
+              value={resFilter}
+              onChange={(e) => setResFilter(e.target.value)}
+              className="absolute inset-0 cursor-pointer opacity-0"
+            >
+              {resolutions.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </FilterPill>
+          <FilterPill label={SORT_LABEL[sort]} icon={<ArrowUpDown size={11} />}>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="absolute inset-0 cursor-pointer opacity-0"
+            >
+              {(Object.keys(SORT_LABEL) as SortKey[]).map((k) => (
+                <option key={k} value={k}>
+                  {SORT_LABEL[k]}
+                </option>
+              ))}
+            </select>
+          </FilterPill>
+        </div>
+      )}
+
+      {loading && <SkeletonCardGrid />}
 
       {!loading && packs.length === 0 && (
         <div className="py-10 text-center text-sm text-text-faint">
@@ -57,55 +114,59 @@ export function TexturePackList() {
         </div>
       )}
 
-      {packs.map((pack) => (
-        <div key={pack.id} className="overflow-hidden rounded-xl border border-border bg-surface">
-          {pack.imageUrl && <img src={pack.imageUrl} alt="" className="h-32 w-full object-cover" />}
-          <div className="p-3.5">
-            <div className="mb-1 flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="truncate text-[14px] font-bold text-text">{pack.name}</div>
-                <div className="truncate text-[11px] text-text-faint">by {pack.authorName}</div>
-              </div>
-              <span className="shrink-0 rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-bold text-accent-light">
-                {pack.resolution}
-              </span>
-            </div>
-
-            <p className="mb-2 text-[12px] leading-snug text-text-muted">{pack.description}</p>
-
-            <div className="mb-3 flex flex-wrap gap-1.5 text-[10px] font-semibold text-text-faint">
-              {pack.fpsBoostLabel && <Tag>{pack.fpsBoostLabel}</Tag>}
-              <Tag>{pack.sizeMB}MB</Tag>
-              <Tag>{pack.downloadCount} downloads</Tag>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleDownload(pack)}
-                className="gradient-good flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-black"
-              >
-                <Download size={13} /> Download
-              </button>
-              {canManage && (
-                <button
-                  onClick={() => setEditing(pack)}
-                  className="flex items-center justify-center rounded-lg bg-surface-2 px-3 text-text-muted hover:text-text"
-                >
-                  <Pencil size={14} />
-                </button>
-              )}
-              {role === "owner" && (
-                <button
-                  onClick={() => handleDelete(pack.id)}
-                  className="flex items-center justify-center rounded-lg bg-surface-2 px-3 text-text-muted hover:text-danger"
-                >
-                  <Trash2 size={14} />
-                </button>
-              )}
-            </div>
-          </div>
+      {downloadError && (
+        <div className="rounded-lg border border-warn/30 bg-warn-soft px-3 py-2 text-[11px] text-warn">
+          {downloadError}
         </div>
-      ))}
+      )}
+
+      {!loading && visible.length > 0 && (
+        <div className="grid grid-cols-2 gap-2.5">
+          {visible.map((pack) => (
+            <div key={pack.id} className="overflow-hidden rounded-xl border border-border bg-surface">
+              {pack.imageUrl ? (
+                <img src={pack.imageUrl} alt="" className="h-20 w-full object-cover" />
+              ) : (
+                <div className="gradient-good h-20 w-full opacity-70" />
+              )}
+              <div className="p-2.5">
+                <div className="mb-1 truncate text-[12px] font-bold leading-tight text-text">{pack.name}</div>
+                <div className="mb-1.5 truncate text-[10px] font-semibold text-text-faint">by {pack.authorName}</div>
+                <div className="mb-2 flex flex-wrap gap-1 text-[9px] font-bold text-text-faint">
+                  <Tag>{pack.resolution}</Tag>
+                  {pack.fpsBoostLabel && <Tag>{pack.fpsBoostLabel}</Tag>}
+                  <Tag>{pack.sizeMB}MB</Tag>
+                  <Tag>{pack.downloadCount}&#8595;</Tag>
+                </div>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => handleDownload(pack)}
+                    className="gradient-good flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-[10.5px] font-bold text-black"
+                  >
+                    <Download size={11} /> Get
+                  </button>
+                  {canManage && (
+                    <button
+                      onClick={() => setEditing(pack)}
+                      className="flex items-center justify-center rounded-lg bg-surface-2 px-2 text-text-muted"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                  )}
+                  {role === "owner" && (
+                    <button
+                      onClick={() => handleDelete(pack.id)}
+                      className="flex items-center justify-center rounded-lg bg-surface-2 px-2 text-text-muted"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {showForm && (
         <TexturePackForm
@@ -127,9 +188,21 @@ export function TexturePackList() {
         />
       )}
     </div>
+    </PullToRefresh>
   );
 }
 
 function Tag({ children }: { children: React.ReactNode }) {
-  return <span className="rounded bg-surface-2 px-1.5 py-0.5">{children}</span>;
+  return <span className="rounded bg-surface-2 px-1 py-0.5">{children}</span>;
+}
+
+function FilterPill({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="relative flex shrink-0 items-center gap-1 rounded-full border border-border-light bg-surface px-2.5 py-1.5 text-[11px] font-bold">
+      {icon}
+      {label}
+      <ChevronDown size={10} className="text-text-faint" />
+      {children}
+    </div>
+  );
 }

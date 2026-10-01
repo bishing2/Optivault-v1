@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Header } from "./components/layout/Header";
+import { SetupStrip } from "./components/layout/SetupStrip";
 import { BottomNav, type Tab } from "./components/layout/BottomNav";
 import { StickyQueueButton } from "./components/mods/StickyQueueButton";
 import { DeviceJvmTab } from "./pages/DeviceJvmTab";
@@ -31,6 +32,7 @@ function App() {
   return (
     <div className="bg-app-glow flex h-dvh flex-col">
       <Header />
+      <SetupStrip onJump={() => setTab("device")} />
       <main className="min-h-0 flex-1 overflow-y-auto">
         {tab === "device" && <DeviceJvmTab />}
         {tab === "mods" && <ModsTab />}

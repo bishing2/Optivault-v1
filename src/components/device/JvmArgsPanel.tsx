@@ -3,6 +3,7 @@ import { Check, Copy, Sliders, Terminal, Lightbulb, Zap } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
 import { RENDERER_LABEL } from "../../data/devices";
 import { buildJvmArgs, ramLabel, tierLabel } from "../../lib/jvmArgs";
+import { tapHaptic } from "../../lib/haptics";
 
 export function JvmArgsPanel() {
   const device = useAppStore((s) => s.selectedDevice());
@@ -68,7 +69,10 @@ export function JvmArgsPanel() {
               {device.ramVariantsGB.map((gb) => (
                 <button
                   key={gb}
-                  onClick={() => selectRamVariant(gb)}
+                  onClick={() => {
+                    tapHaptic();
+                    selectRamVariant(gb);
+                  }}
                   className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
                     gb === device.ramGB
                       ? "gradient-good border-transparent text-black"
